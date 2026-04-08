@@ -5,6 +5,7 @@ import { useTheme } from "./ThemeContext";
 import type { Currency, Invoice, LineItem, Party } from "@/types/invoice";
 import { computeInvoiceTotals } from "@/types/invoice";
 import { createSampleInvoice, createEmptyLineItem } from "@/lib/invoice/sample";
+import { downloadInvoicePDF } from "@/lib/pdf/download";
 
 type PartyKey = "supplier" | "customer";
 
@@ -26,7 +27,19 @@ export function InvoiceForm() {
   const isMono = t.id === "minimal-mono";
 
   const [invoice, setInvoice] = useState<Invoice>(createSampleInvoice);
+  const [isGenerating, setIsGenerating] = useState(false);
   const totals = computeInvoiceTotals(invoice);
+
+  const handleDownloadPDF = useCallback(async () => {
+    setIsGenerating(true);
+    try {
+      await downloadInvoicePDF(invoice);
+    } catch (err) {
+      console.error("Failed to generate invoice PDF", err);
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [invoice]);
 
   const updateField = useCallback(
     <K extends keyof Invoice>(key: K, value: Invoice[K]) => {
@@ -400,6 +413,14 @@ export function InvoiceForm() {
           className={`${isMono ? "text-[10px] uppercase tracking-widest" : "px-6 py-3 text-sm font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} ${t.secondaryBtnBorder} transition-colors`}
         >
           {isMono ? "Draft" : "Save Draft"}
+        </button>
+        <button
+          type="button"
+          onClick={handleDownloadPDF}
+          disabled={isGenerating}
+          className={`${isMono ? "text-[10px] uppercase tracking-widest" : "px-6 py-3 text-sm font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} ${t.secondaryBtnBorder} transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+        >
+          {isGenerating ? (isMono ? "..." : "Generating...") : isMono ? "PDF" : "Download PDF"}
         </button>
         <button
           type="button"
