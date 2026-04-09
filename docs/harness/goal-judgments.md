@@ -144,3 +144,38 @@ The ranking criteria prioritize confidence (#1) over impact (#2). Follow-up item
 - 9 tasks in one run works with per-task tsc + commit rhythm. The key is that each task is independently testable and committable.
 - The mega-iteration pattern is best when the user explicitly wants velocity over granularity. Don't auto-select this pattern — it's a user choice.
 - createSampleInvoice() now depends on loadSettings() which reads localStorage — this means it can't be called server-side without the `typeof window` guard. Keep the guard.
+
+---
+
+## Run #12 — 2026-04-09
+
+**Mode:** improve (Autonomous — Business Domain Scan)
+**Health scan:** 0 TS errors, 0 lint, 76/76 tests, 0 TODOs, largest file 594 LOC
+**Infrastructure check:** PASS (SPA shell with 4 tabs)
+**Selected goal:** QR payment codes (SPD) + invoice detail view from dashboard
+**Source:** business domain scan (Czech Banking Association SPD standard) + open follow-up (dashboard click-through)
+**Confidence at selection:** medium
+**Quality score:** 100/100
+**User verdict:** pending
+
+**Backlog presented:**
+1. QR payment codes + invoice detail (selected) — domain scan + follow-up
+2. Use Template to pre-fill from recurring — follow-up
+3. CSV/JSON export for tax filing — competitive
+4. Email share via mailto: — competitive
+5. Drag-to-reorder + DraftsPanel fix — follow-up bundle
+
+**What was implemented (7 tasks, 8 commits):**
+1. `qrcode` npm dependency + SPD string generator (`src/lib/payment/spd.ts`)
+2. QrPayment React component — renders SPD QR from invoice data
+3. QR code in InvoicePDF via pre-generated data URL passed as Image
+4. QR wired into InvoiceForm below payment details
+5. InvoiceDetail — read-only view with status actions (mark paid, advance, PDF download)
+6. Dashboard clickable rows opening InvoiceDetail
+7. 16 tests for SPD format compliance
+
+**Lessons for future ranking:**
+- Business domain scan correctly identified QR payments as highest impact. This is the first feature that makes the product distinctly Czech-market-ready.
+- The `qrcode` npm package works cleanly with both React DOM (toDataURL) and @react-pdf/renderer (Image src). No issues with the dual-render approach.
+- InvoiceDetail needs to reload the invoice after status changes to show updated state. The `handleDetailUpdated` pattern (refresh list + reload selected) works.
+- SPD format is simple enough that a pure string generator covers it — no need for a dedicated library beyond QR rendering.
