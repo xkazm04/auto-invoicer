@@ -87,8 +87,12 @@ export default function DashboardPage() {
   const { theme: t } = useTheme();
   const isMono = t.id === "minimal-mono";
 
-  const [archived, setArchived] = useState<ArchivedInvoiceSummary[]>([]);
-  const [drafts, setDrafts] = useState<DraftSummary[]>([]);
+  const [archived, setArchived] = useState<ArchivedInvoiceSummary[]>(() =>
+    typeof window !== "undefined" ? listArchived() : []
+  );
+  const [drafts, setDrafts] = useState<DraftSummary[]>(() =>
+    typeof window !== "undefined" ? listDrafts() : []
+  );
   const [filter, setFilter] = useState<FilterStatus>("all");
 
   const refresh = useCallback(() => {
@@ -97,7 +101,6 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    refresh();
     const handleStorage = (e: StorageEvent) => {
       if (e.key?.startsWith("invoice-archive:") || e.key?.startsWith("invoice-drafts:")) {
         refresh();
