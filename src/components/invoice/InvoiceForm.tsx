@@ -7,11 +7,8 @@ import { computeInvoiceTotals, nextStatus } from "@/types/invoice";
 import { createSampleInvoice, createEmptyLineItem } from "@/lib/invoice/sample";
 import { downloadInvoicePDF } from "@/lib/pdf/download";
 import { validateInvoice, type ValidationErrors } from "@/lib/invoice/validation";
-import { ContactPicker } from "./ContactPicker";
-import { saveContact } from "@/lib/contacts/store";
-import { lookupVat } from "@/lib/vat/lookup";
+import { PartySection } from "./PartySection";
 
-type PartyKey = "supplier" | "customer";
 
 function formatAmount(value: number, isMono: boolean, isTotal: boolean): string {
   const fractionDigits = isTotal || isMono ? 0 : 2;
@@ -76,16 +73,6 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
     [hasAttemptedCreate, revalidate]
   );
 
-  const updateParty = useCallback(
-    (which: PartyKey, key: keyof Party, value: string) => {
-      setInvoice((prev) => {
-        const next = { ...prev, [which]: { ...prev[which], [key]: value } };
-        if (hasAttemptedCreate) revalidate(next);
-        return next;
-      });
-    },
-    [hasAttemptedCreate, revalidate]
-  );
 
   const updateLineItem = useCallback(
     <K extends keyof LineItem>(id: string, key: K, value: LineItem[K]) => {
@@ -121,7 +108,7 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
     setInvoice((prev) => ({ ...prev, status: nextStatus(prev.status) }));
   }, []);
 
-  const fillParty = useCallback((which: PartyKey, party: Party) => {
+  const fillParty = useCallback((which: "supplier" | "customer", party: Party) => {
     setInvoice((prev) => {
       const next = { ...prev, [which]: party };
       if (hasAttemptedCreate) revalidate(next);
@@ -138,38 +125,6 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
     },
     []
   );
-
-  const [lookingUp, setLookingUp] = useState<PartyKey | null>(null);
-
-  const handleVatLookup = useCallback(async (which: PartyKey) => {
-    const party = invoice[which];
-    const vatId = party.vatId || party.taxId;
-    if (!vatId.trim()) return;
-    setLookingUp(which);
-    try {
-      const result = await lookupVat(vatId.trim(), invoice.currency === "CZK" ? "CZ" : "EU");
-      if (result.valid && result.name) {
-        fillParty(which, {
-          ...party,
-          name: result.name || party.name,
-          address: result.address || party.address,
-        });
-      }
-    } catch {
-      // silently fail — button just does nothing visible
-    } finally {
-      setLookingUp(null);
-    }
-  }, [invoice, fillParty]);
-
-  const [savedFlash, setSavedFlash] = useState<PartyKey | null>(null);
-  const handleSaveContact = useCallback((which: PartyKey) => {
-    const party = invoice[which];
-    if (!party.name.trim()) return;
-    saveContact(party);
-    setSavedFlash(which);
-    setTimeout(() => setSavedFlash(null), 1500);
-  }, [invoice]);
 
   const dateFields: Array<{
     label: string;
@@ -269,151 +224,34 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
       {/* Parties */}
       <div className="mb-10">
         <div className={`grid grid-cols-2 ${isMono ? "gap-8" : "gap-5"}`}>
-          {/* Supplier */}
-          <div className={`${t.partyFromBg} ${t.id === "paper-perfect" ? "rounded-2xl p-6 shadow-[0_4px_16px_rgba(0,0,0,0.03)]" : ""}`}>
-            <div className={`flex items-center gap-2 ${t.id === "paper-perfect" ? "mb-5" : "mb-3"}`}>
-              {t.id === "paper-perfect" ? (
-                <div className={`w-8 h-8 rounded-full ${t.partyIconBg} flex items-center justify-center`}>
-                  <svg className={`w-4 h-4 ${t.partyIconColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                </div>
-              ) : null}
-              {t.useHandwritten ? (
-                <span className={`font-[family-name:var(--font-caveat)] text-2xl ${t.partyIconColor}`}>From</span>
-              ) : (
-                <span className={`text-[13px] uppercase tracking-widest ${t.labelColor}`}>Supplier</span>
-              )}
-              <div className="ml-auto flex items-center gap-2">
-                <ContactPicker onSelect={(p) => fillParty("supplier", p)} />
-                {invoice.supplier.name.trim() && (
-                  <button type="button" onClick={() => handleSaveContact("supplier")} className={`${isMono ? "text-[13px]" : "text-xs font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} transition-colors`}>
-                    {savedFlash === "supplier" ? (isMono ? "ok" : "Saved!") : (isMono ? "save" : "Save")}
-                  </button>
-                )}
-              </div>
-            </div>
-            <div className={`space-y-${isMono ? "1" : "4"}`}>
-              <input
-                type="text"
-                placeholder="Company Name"
-                value={invoice.supplier.name}
-                onChange={(e) => updateParty("supplier", "name", e.target.value)}
-                className={`w-full ${isMono ? "text-xs" : "text-base font-medium"} ${t.inputText} ${t.inputPlaceholder} bg-transparent focus:outline-none ${isMono ? "border-b border-neutral-100 pb-1 focus:border-neutral-900 transition-colors" : ""}`}
-              />
-              {hasAttemptedCreate && <FieldError path="supplier.name" errors={validationErrors} />}
-              <div className={`grid grid-cols-2 gap-${isMono ? "2" : "3"}`}>
-                <div>
-                  <label className={`text-[13px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>Tax ID</label>
-                  <input
-                    type="text"
-                    placeholder="000-000-000"
-                    value={invoice.supplier.taxId}
-                    onChange={(e) => updateParty("supplier", "taxId", e.target.value)}
-                    className={`w-full ${isMono ? "text-xs" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} ${t.inputBg} ${t.inputRadius} ${t.inputPadding} focus:outline-none ${t.inputFocusBg} ${isMono ? "border-b border-neutral-100 focus:border-neutral-900" : ""} transition-colors`}
-                  />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1 mb-1.5">
-                    <label className={`text-[13px] font-semibold ${t.labelColor} uppercase tracking-wider`}>VAT ID</label>
-                    <button type="button" onClick={() => handleVatLookup("supplier")} disabled={lookingUp === "supplier"} className={`${isMono ? "text-[11px]" : "text-[11px] font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} transition-colors disabled:opacity-50`}>
-                      {lookingUp === "supplier" ? "..." : isMono ? "[lookup]" : "Lookup"}
-                    </button>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="CZ000000000"
-                    value={invoice.supplier.vatId}
-                    onChange={(e) => updateParty("supplier", "vatId", e.target.value)}
-                    className={`w-full ${isMono ? "text-xs" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} ${t.inputBg} ${t.inputRadius} ${t.inputPadding} focus:outline-none ${t.inputFocusBg} ${isMono ? "border-b border-neutral-100 focus:border-neutral-900" : ""} transition-colors`}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className={`text-[13px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>Address</label>
-                <textarea
-                  placeholder="Street, City, Country"
-                  rows={2}
-                  value={invoice.supplier.address}
-                  onChange={(e) => updateParty("supplier", "address", e.target.value)}
-                  className={`w-full ${isMono ? "text-xs" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} bg-transparent focus:outline-none resize-none leading-relaxed ${isMono ? "border-b border-neutral-100 pb-1 focus:border-neutral-900 transition-colors" : ""}`}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Customer */}
-          <div className={`${t.partyToBg} ${t.id === "paper-perfect" ? "rounded-2xl p-6 shadow-[0_4px_16px_rgba(0,0,0,0.03)]" : ""}`}>
-            <div className={`flex items-center gap-2 ${t.id === "paper-perfect" ? "mb-5" : "mb-3"}`}>
-              {t.id === "paper-perfect" ? (
-                <div className={`w-8 h-8 rounded-full ${t.partyToIconBg} flex items-center justify-center`}>
-                  <svg className={`w-4 h-4 ${t.partyToIconColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-              ) : null}
-              {t.useHandwritten ? (
-                <span className={`font-[family-name:var(--font-caveat)] text-2xl ${t.partyToIconColor}`}>To</span>
-              ) : (
-                <span className={`text-[13px] uppercase tracking-widest ${t.labelColor}`}>Customer</span>
-              )}
-              <div className="ml-auto flex items-center gap-2">
-                <ContactPicker onSelect={(p) => fillParty("customer", p)} />
-                {invoice.customer.name.trim() && (
-                  <button type="button" onClick={() => handleSaveContact("customer")} className={`${isMono ? "text-[13px]" : "text-xs font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} transition-colors`}>
-                    {savedFlash === "customer" ? (isMono ? "ok" : "Saved!") : (isMono ? "save" : "Save")}
-                  </button>
-                )}
-              </div>
-            </div>
-            <div className={`space-y-${isMono ? "1" : "4"}`}>
-              <input
-                type="text"
-                placeholder="Client Name"
-                value={invoice.customer.name}
-                onChange={(e) => updateParty("customer", "name", e.target.value)}
-                className={`w-full ${isMono ? "text-xs" : "text-base font-medium"} ${t.inputText} ${t.inputPlaceholder} bg-transparent focus:outline-none ${isMono ? "border-b border-neutral-100 pb-1 focus:border-neutral-900 transition-colors" : ""}`}
-              />
-              {hasAttemptedCreate && <FieldError path="customer.name" errors={validationErrors} />}
-              <div className={`grid grid-cols-2 gap-${isMono ? "2" : "3"}`}>
-                <div>
-                  <label className={`text-[13px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>Tax ID</label>
-                  <input
-                    type="text"
-                    placeholder="000-000-000"
-                    value={invoice.customer.taxId}
-                    onChange={(e) => updateParty("customer", "taxId", e.target.value)}
-                    className={`w-full ${isMono ? "text-xs" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} ${t.inputBg} ${t.inputRadius} ${t.inputPadding} focus:outline-none ${t.inputFocusBg} ${isMono ? "border-b border-neutral-100 focus:border-neutral-900" : ""} transition-colors`}
-                  />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1 mb-1.5">
-                    <label className={`text-[13px] font-semibold ${t.labelColor} uppercase tracking-wider`}>VAT ID</label>
-                    <button type="button" onClick={() => handleVatLookup("customer")} disabled={lookingUp === "customer"} className={`${isMono ? "text-[11px]" : "text-[11px] font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} transition-colors disabled:opacity-50`}>
-                      {lookingUp === "customer" ? "..." : isMono ? "[lookup]" : "Lookup"}
-                    </button>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="CZ000000000"
-                    value={invoice.customer.vatId}
-                    onChange={(e) => updateParty("customer", "vatId", e.target.value)}
-                    className={`w-full ${isMono ? "text-xs" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} ${t.inputBg} ${t.inputRadius} ${t.inputPadding} focus:outline-none ${t.inputFocusBg} ${isMono ? "border-b border-neutral-100 focus:border-neutral-900" : ""} transition-colors`}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className={`text-[13px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>Address</label>
-                <textarea
-                  placeholder="Street, City, Country"
-                  rows={2}
-                  value={invoice.customer.address}
-                  onChange={(e) => updateParty("customer", "address", e.target.value)}
-                  className={`w-full ${isMono ? "text-xs" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} bg-transparent focus:outline-none resize-none leading-relaxed ${isMono ? "border-b border-neutral-100 pb-1 focus:border-neutral-900 transition-colors" : ""}`}
-                />
-              </div>
-            </div>
-          </div>
+          <PartySection
+            party={invoice.supplier}
+            partyKey="supplier"
+            label="Supplier"
+            handwrittenLabel="From"
+            bgClass={t.partyFromBg}
+            iconBgClass={t.partyIconBg}
+            iconColorClass={t.partyIconColor}
+            iconPath="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+            onChange={(p) => fillParty("supplier", p)}
+            validationErrors={validationErrors}
+            showValidation={hasAttemptedCreate}
+            countryHint={invoice.currency === "CZK" ? "CZ" : "EU"}
+          />
+          <PartySection
+            party={invoice.customer}
+            partyKey="customer"
+            label="Customer"
+            handwrittenLabel="To"
+            bgClass={t.partyToBg}
+            iconBgClass={t.partyToIconBg}
+            iconColorClass={t.partyToIconColor}
+            iconPath="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            onChange={(p) => fillParty("customer", p)}
+            validationErrors={validationErrors}
+            showValidation={hasAttemptedCreate}
+            countryHint={invoice.currency === "CZK" ? "CZ" : "EU"}
+          />
         </div>
       </div>
 
