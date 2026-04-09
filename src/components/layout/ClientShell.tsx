@@ -1,25 +1,75 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, lazy, Suspense, useCallback, type ReactNode } from "react";
 import type { ThemeId } from "@/components/invoice/theme";
 import { themes } from "@/components/invoice/theme";
 import { ThemeContext } from "@/components/invoice/ThemeContext";
-import { AppHeader } from "./AppHeader";
+import { AppHeader, type TabId } from "./AppHeader";
+import { FadeIn } from "@/components/ui/FadeIn";
 
-interface ClientShellProps {
-  children: ReactNode;
+const DashboardModule = lazy(() => import("@/modules/DashboardModule"));
+const InvoicesModule = lazy(() => import("@/modules/InvoicesModule"));
+const ContactsModule = lazy(() => import("@/modules/ContactsModule"));
+const SettingsModule = lazy(() => import("@/modules/SettingsModule"));
+
+function ModuleSkeleton() {
+  return (
+    <div className="max-w-4xl mx-auto animate-pulse">
+      <div className="h-6 w-32 bg-neutral-200 rounded mb-8" />
+      <div className="grid grid-cols-4 gap-4 mb-8">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="h-20 bg-neutral-100 rounded-xl" />
+        ))}
+      </div>
+      <div className="space-y-3">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="h-12 bg-neutral-100 rounded-xl" />
+        ))}
+      </div>
+    </div>
+  );
 }
 
-export function ClientShell({ children }: ClientShellProps) {
+interface ClientShellProps {
+  children?: ReactNode;
+}
+
+export function ClientShell({ children: _children }: ClientShellProps) {
   const [themeId, setThemeId] = useState<ThemeId>("paper-perfect");
+  const [activeTab, setActiveTab] = useState<TabId>("dashboard");
+  const [moduleKey, setModuleKey] = useState(0);
   const theme = themes[themeId];
+
+  const handleTabChange = useCallback((tab: TabId) => {
+    if (tab !== activeTab) {
+      setActiveTab(tab);
+      setModuleKey((k) => k + 1);
+    }
+  }, [activeTab]);
+
+  const renderModule = () => {
+    switch (activeTab) {
+      case "dashboard":
+        return <DashboardModule onNavigate={handleTabChange} />;
+      case "invoices":
+        return <InvoicesModule />;
+      case "contacts":
+        return <ContactsModule />;
+      case "settings":
+        return <SettingsModule />;
+    }
+  };
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme: setThemeId }}>
       <div className={`min-h-screen transition-all duration-500 ${theme.pageBg}`}>
-        <AppHeader />
+        <AppHeader activeTab={activeTab} onTabChange={handleTabChange} />
         <main className={`pt-16 pb-12 px-4 ${theme.fontFamily}`}>
-          {children}
+          <Suspense fallback={<ModuleSkeleton />}>
+            <FadeIn key={moduleKey} duration={300}>
+              {renderModule()}
+            </FadeIn>
+          </Suspense>
         </main>
       </div>
     </ThemeContext.Provider>

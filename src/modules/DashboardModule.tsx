@@ -10,7 +10,7 @@ import type { Currency, InvoiceStatus } from "@/types/invoice";
 type FilterStatus = "all" | InvoiceStatus;
 
 interface DashboardModuleProps {
-  onNavigate: (tab: string) => void;
+  onNavigate: (tab: "dashboard" | "invoices" | "contacts" | "settings") => void;
 }
 
 function isOverdue(dueDate: string, status: string): boolean {

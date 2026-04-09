@@ -1,19 +1,23 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useTheme } from "@/components/invoice/ThemeContext";
 import { themes } from "@/components/invoice/theme";
 
-const NAV_ITEMS = [
-  { href: "/dashboard", label: "Dashboard", monoLabel: "dash" },
-  { href: "/invoices", label: "Invoices", monoLabel: "inv" },
-  { href: "/contacts", label: "Contacts", monoLabel: "con" },
-  { href: "/settings", label: "Settings", monoLabel: "cfg" },
+export type TabId = "dashboard" | "invoices" | "contacts" | "settings";
+
+const NAV_ITEMS: { id: TabId; label: string; monoLabel: string }[] = [
+  { id: "dashboard", label: "Dashboard", monoLabel: "dash" },
+  { id: "invoices", label: "Invoices", monoLabel: "inv" },
+  { id: "contacts", label: "Contacts", monoLabel: "con" },
+  { id: "settings", label: "Settings", monoLabel: "cfg" },
 ];
 
-export function AppHeader() {
-  const pathname = usePathname();
+interface AppHeaderProps {
+  activeTab: TabId;
+  onTabChange: (tab: TabId) => void;
+}
+
+export function AppHeader({ activeTab, onTabChange }: AppHeaderProps) {
   const { theme: t, setTheme } = useTheme();
   const isMono = t.id === "minimal-mono";
 
@@ -39,12 +43,12 @@ export function AppHeader() {
 
           <nav className="flex items-center gap-1">
             {NAV_ITEMS.map((item) => {
-              const isActive =
-                pathname === item.href || pathname.startsWith(item.href + "/");
+              const isActive = activeTab === item.id;
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => onTabChange(item.id)}
                   className={`${
                     isMono
                       ? "text-xs uppercase tracking-widest px-2 py-1"
@@ -60,13 +64,12 @@ export function AppHeader() {
                   }`}
                 >
                   {isMono ? item.monoLabel : item.label}
-                </Link>
+                </button>
               );
             })}
           </nav>
         </div>
 
-        {/* Theme toggle */}
         <div className="flex gap-1">
           {Object.values(themes).map((theme) => (
             <button
