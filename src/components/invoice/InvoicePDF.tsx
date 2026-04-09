@@ -294,6 +294,12 @@ export function InvoicePDF({ invoice, themeId = "paper-perfect" }: InvoicePDFPro
               <Text style={styles.partyDetailLabel}>VAT ID</Text>
               <Text style={styles.partyDetailValue}>{invoice.supplier.vatId || "—"}</Text>
             </View>
+            {invoice.supplier.registrationId ? (
+              <View style={styles.partyDetailRow}>
+                <Text style={styles.partyDetailLabel}>Reg. #</Text>
+                <Text style={styles.partyDetailValue}>{invoice.supplier.registrationId}</Text>
+              </View>
+            ) : null}
             {invoice.supplier.address ? (
               <Text style={styles.partyAddress}>{invoice.supplier.address}</Text>
             ) : null}
@@ -310,6 +316,12 @@ export function InvoicePDF({ invoice, themeId = "paper-perfect" }: InvoicePDFPro
               <Text style={styles.partyDetailLabel}>VAT ID</Text>
               <Text style={styles.partyDetailValue}>{invoice.customer.vatId || "—"}</Text>
             </View>
+            {invoice.customer.registrationId ? (
+              <View style={styles.partyDetailRow}>
+                <Text style={styles.partyDetailLabel}>Reg. #</Text>
+                <Text style={styles.partyDetailValue}>{invoice.customer.registrationId}</Text>
+              </View>
+            ) : null}
             {invoice.customer.address ? (
               <Text style={styles.partyAddress}>{invoice.customer.address}</Text>
             ) : null}
