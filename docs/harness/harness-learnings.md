@@ -62,7 +62,7 @@ Living reference for vibeman / autonomous-development runs against this project.
 - **2026-04-09** — Invoice archive store (`src/lib/invoice/archive.ts`) uses `invoice-archive:` localStorage prefix. Pattern matches drafts and contacts stores. Archive stores the full Invoice + `_archivedAt` metadata.
 - **2026-04-09** — Settings store (`src/lib/settings/store.ts`) key: `app-settings`. Uses `createDefaultSettings()` for missing-field merge on load. Company profile auto-fills supplier on new invoices via `createSampleInvoice()`.
 - **2026-04-09** — Recurring templates store (`src/lib/recurring/store.ts`) uses `recurring-template:` prefix. Template captures line items, contact, payment details, interval. "Save as Template" inline form in InvoiceForm actions area.
-- **2026-04-09** — App now has 4 routes: `/dashboard`, `/invoices`, `/contacts`, `/settings`. Homepage `/` redirects to `/dashboard`. NAV_ITEMS in AppHeader controls nav links.
+- ~~**2026-04-09** — App now has 4 routes~~ **REPLACED Run #11** — App is now a SPA. Single route `/` with tab-based navigation. Modules in `src/modules/` are lazy-loaded via `React.lazy()` + `Suspense`. AppHeader uses `TabId` state instead of `next/link` + `usePathname()`. ClientShell owns `activeTab` state and renders the active module with FadeIn transition.
 - **2026-04-09** — `formatMoney()` in `src/lib/currency/format.ts` is the single source of truth for currency formatting. Uses `Intl.NumberFormat` with locale per currency (cs-CZ, de-DE, en-US). Options: `{ decimals?: boolean, symbolOnly?: boolean }`.
 - **2026-04-09** — Dashboard computes KPIs client-side from archive + drafts lists. Overdue detection uses `dueDate < now && status !== "paid"`. No server-side aggregation yet.
 - **2026-04-09** — `createSampleInvoice()` now auto-fills from settings: supplier, payment details, currency, VAT rate. Issue date = today, due date = today + 14 days. Line items start with 1 empty item instead of 2 sample items.
@@ -71,3 +71,11 @@ Living reference for vibeman / autonomous-development runs against this project.
 - Dashboard has no clickable invoice rows (no detail view / edit from dashboard).
 - No email/share/export functionality beyond PDF download.
 - No multi-language support (i18n).
+
+## Open follow-ups (from Run #11, 2026-04-09)
+
+- **2026-04-09** — SPA architecture: `ClientShell.tsx` owns `activeTab` state (type `TabId`). Modules are `React.lazy()` imports from `src/modules/`. Each tab switch increments `moduleKey` to trigger FadeIn re-animation.
+- **2026-04-09** — Animation system: `FadeIn` (delay, duration, fadeInUp keyframe) and `StaggeredList` (incremental delay per child) in `src/components/ui/`. Applied to dashboard KPIs, contact list, settings sections.
+- **2026-04-09** — React.memo applied to: `PartySection`, `ContactPicker`, `ConfirmDialog`, `InvoiceForm` (via MemoizedInvoiceForm in InvoicesModule). useMemo on: invoice totals, dashboard KPIs, unified invoice list, filtered list, KPI cards.
+- **2026-04-09** — Old route pages deleted (`/dashboard`, `/invoices`, `/contacts`, `/settings`). Only `/` and `/api/vat/validate` remain as Next.js routes. Adding a new "tab" requires: create `src/modules/XModule.tsx`, add lazy import in `ClientShell.tsx`, add `TabId` union member, add case to `renderModule()`, add entry to `NAV_ITEMS` in `AppHeader.tsx`.
+- DraftsPanel BroadcastChannel should be called from InvoicesModule after save (currently `notifyDraftsChanged()` is exported but not called from the save handler in InvoicesModule).
