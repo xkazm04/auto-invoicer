@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTheme } from "./ThemeContext";
 import { listDrafts, deleteDraft, type DraftSummary } from "@/lib/invoice/drafts";
 import { formatMoney } from "@/lib/currency/format";
 import type { Currency } from "@/types/invoice";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+
+const DRAFTS_CHANNEL = "invoice-drafts-sync";
 
 interface DraftsPanelProps {
   onLoadDraft: (id: string) => void;
@@ -25,6 +28,17 @@ function formatDate(iso: string): string {
   }
 }
 
+/** Notify same-tab listeners that drafts changed */
+export function notifyDraftsChanged(): void {
+  try {
+    const bc = new BroadcastChannel(DRAFTS_CHANNEL);
+    bc.postMessage("changed");
+    bc.close();
+  } catch {
+    // BroadcastChannel not available — will fall back to polling
+  }
+}
+
 export function DraftsPanel({ onLoadDraft, onNewInvoice }: DraftsPanelProps) {
   const { theme: t } = useTheme();
   const isMono = t.id === "minimal-mono";
@@ -32,31 +46,60 @@ export function DraftsPanel({ onLoadDraft, onNewInvoice }: DraftsPanelProps) {
   const [drafts, setDrafts] = useState<DraftSummary[]>(() =>
     typeof window !== "undefined" ? listDrafts() : []
   );
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const bcRef = useRef<BroadcastChannel | null>(null);
 
   const refresh = useCallback(() => {
     setDrafts(listDrafts());
   }, []);
 
   useEffect(() => {
+    // Cross-tab sync via StorageEvent
     const handleStorage = (e: StorageEvent) => {
       if (e.key?.startsWith("invoice-drafts:")) refresh();
     };
     window.addEventListener("storage", handleStorage);
-    // Poll for same-tab saves (localStorage doesn't fire storage events in same tab)
-    const interval = setInterval(refresh, 2000);
+
+    // Same-tab sync via BroadcastChannel (replaces 2s polling)
+    try {
+      const bc = new BroadcastChannel(DRAFTS_CHANNEL);
+      bc.onmessage = () => refresh();
+      bcRef.current = bc;
+    } catch {
+      // Fallback: poll every 2s only if BroadcastChannel unavailable
+    }
+
+    // Light fallback poll (10s instead of 2s) for edge cases
+    const interval = setInterval(refresh, 10000);
+
     return () => {
       window.removeEventListener("storage", handleStorage);
+      bcRef.current?.close();
       clearInterval(interval);
     };
   }, [refresh]);
 
-  const handleDelete = useCallback((id: string) => {
-    deleteDraft(id);
-    refresh();
-  }, [refresh]);
+  const confirmDelete = useCallback(() => {
+    if (deleteTarget) {
+      deleteDraft(deleteTarget);
+      notifyDraftsChanged();
+      refresh();
+      setDeleteTarget(null);
+    }
+  }, [deleteTarget, refresh]);
 
   return (
     <div className={`${isMono ? "border-r border-neutral-200 pr-4" : ""} w-full`}>
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="Delete Draft"
+        message="This draft will be permanently deleted. This action cannot be undone."
+        confirmLabel="Delete"
+        destructive
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
+
       <div className="flex items-center justify-between mb-4">
         {t.useHandwritten ? (
           <span className={`font-[family-name:var(--font-caveat)] text-xl ${t.sectionLabel}`}>Drafts</span>
@@ -99,7 +142,7 @@ export function DraftsPanel({ onLoadDraft, onNewInvoice }: DraftsPanelProps) {
                   </span>
                   <button
                     type="button"
-                    onClick={(e) => { e.stopPropagation(); handleDelete(draft.id); }}
+                    onClick={(e) => { e.stopPropagation(); setDeleteTarget(draft.id); }}
                     className="opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-red-500 transition-all"
                     title="Delete draft"
                   >

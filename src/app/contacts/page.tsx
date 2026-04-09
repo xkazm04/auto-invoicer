@@ -11,6 +11,7 @@ import {
   listContacts,
 } from "@/lib/contacts/store";
 import { PartySection } from "@/components/invoice/PartySection";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 const EMPTY_PARTY: Party = { name: "", taxId: "", vatId: "", address: "", registrationId: "" };
 
@@ -24,6 +25,7 @@ export default function ContactsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Party>(EMPTY_PARTY);
   const [isAdding, setIsAdding] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   const refresh = useCallback(() => setContacts(listContacts()), []);
 
@@ -52,14 +54,16 @@ export default function ContactsPage() {
     refresh();
   }, [draft, editingId, refresh]);
 
-  const handleDelete = useCallback((id: string) => {
-    deleteContact(id);
-    if (editingId === id) {
+  const confirmDelete = useCallback(() => {
+    if (!deleteTarget) return;
+    deleteContact(deleteTarget);
+    if (editingId === deleteTarget) {
       setEditingId(null);
       setDraft(EMPTY_PARTY);
     }
+    setDeleteTarget(null);
     refresh();
-  }, [editingId, refresh]);
+  }, [deleteTarget, editingId, refresh]);
 
   const handleCancel = useCallback(() => {
     setDraft(EMPTY_PARTY);
@@ -71,6 +75,15 @@ export default function ContactsPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="Delete Contact"
+        message="This contact will be permanently deleted. This action cannot be undone."
+        confirmLabel="Delete"
+        destructive
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
       <div className="flex items-center justify-between mb-6">
         {t.useHandwritten ? (
           <span className={`font-[family-name:var(--font-caveat)] text-2xl ${t.sectionLabel}`}>Contacts</span>
@@ -164,7 +177,7 @@ export default function ContactsPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleDelete(contact.id)}
+                    onClick={() => setDeleteTarget(contact.id)}
                     className={`${isMono ? "text-[13px]" : "text-xs"} text-neutral-400 hover:text-red-500 transition-colors`}
                   >
                     {isMono ? "del" : "Delete"}
