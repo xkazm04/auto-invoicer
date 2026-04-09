@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useTheme } from "./ThemeContext";
-import type { Currency, Invoice, LineItem, Party } from "@/types/invoice";
+import type { Currency, Invoice, LineItem, Party, PaymentDetails } from "@/types/invoice";
 import { computeInvoiceTotals, nextStatus } from "@/types/invoice";
 import { createSampleInvoice, createEmptyLineItem } from "@/lib/invoice/sample";
 import { downloadInvoicePDF } from "@/lib/pdf/download";
@@ -127,6 +127,16 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
       return next;
     });
   }, [hasAttemptedCreate, revalidate]);
+
+  const updatePaymentDetail = useCallback(
+    (key: keyof PaymentDetails, value: string) => {
+      setInvoice((prev) => ({
+        ...prev,
+        paymentDetails: { ...prev.paymentDetails, [key]: value },
+      }));
+    },
+    []
+  );
 
   const [savedFlash, setSavedFlash] = useState<PartyKey | null>(null);
   const handleSaveContact = useCallback((which: PartyKey) => {
@@ -503,6 +513,61 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
                   </span>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Payment Details */}
+      <div className="mb-10">
+        <div className="mb-4">
+          {t.useHandwritten ? (
+            <span className={`font-[family-name:var(--font-caveat)] text-2xl ${t.sectionLabel}`}>Payment</span>
+          ) : (
+            <span className={`text-[11px] uppercase tracking-widest ${t.labelColor}`}>Payment Details</span>
+          )}
+        </div>
+        <div className={`${t.cardBg} ${t.cardRadius} ${isMono ? "p-3" : "p-5"} ${t.cardShadow}`}>
+          <div className={`grid grid-cols-2 gap-${isMono ? "2" : "4"}`}>
+            <div>
+              <label className={`text-[11px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>IBAN</label>
+              <input
+                type="text"
+                placeholder="CZ65 0800 0000 0012 3456 7899"
+                value={invoice.paymentDetails.iban}
+                onChange={(e) => updatePaymentDetail("iban", e.target.value)}
+                className={`w-full ${isMono ? "text-[13px]" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} ${t.inputBg} ${t.inputRadius} ${t.inputPadding} focus:outline-none ${t.inputFocusBg} ${isMono ? "border-b border-neutral-100 focus:border-neutral-900" : ""} transition-colors font-mono`}
+              />
+            </div>
+            <div>
+              <label className={`text-[11px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>SWIFT / BIC</label>
+              <input
+                type="text"
+                placeholder="GIBACZPX"
+                value={invoice.paymentDetails.swift}
+                onChange={(e) => updatePaymentDetail("swift", e.target.value)}
+                className={`w-full ${isMono ? "text-[13px]" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} ${t.inputBg} ${t.inputRadius} ${t.inputPadding} focus:outline-none ${t.inputFocusBg} ${isMono ? "border-b border-neutral-100 focus:border-neutral-900" : ""} transition-colors font-mono`}
+              />
+            </div>
+            <div>
+              <label className={`text-[11px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>Bank Name</label>
+              <input
+                type="text"
+                placeholder="Česká spořitelna"
+                value={invoice.paymentDetails.bankName}
+                onChange={(e) => updatePaymentDetail("bankName", e.target.value)}
+                className={`w-full ${isMono ? "text-[13px]" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} ${t.inputBg} ${t.inputRadius} ${t.inputPadding} focus:outline-none ${t.inputFocusBg} ${isMono ? "border-b border-neutral-100 focus:border-neutral-900" : ""} transition-colors`}
+              />
+            </div>
+            <div>
+              <label className={`text-[11px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>Reference / VS</label>
+              <input
+                type="text"
+                placeholder="Variable symbol"
+                value={invoice.paymentDetails.reference}
+                onChange={(e) => updatePaymentDetail("reference", e.target.value)}
+                className={`w-full ${isMono ? "text-[13px]" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} ${t.inputBg} ${t.inputRadius} ${t.inputPadding} focus:outline-none ${t.inputFocusBg} ${isMono ? "border-b border-neutral-100 focus:border-neutral-900" : ""} transition-colors font-mono`}
+              />
             </div>
           </div>
         </div>
