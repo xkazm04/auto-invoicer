@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTheme } from "@/components/invoice/ThemeContext";
-import { listArchived, type ArchivedInvoiceSummary } from "@/lib/invoice/archive";
+import { listArchived, loadArchived, type ArchivedInvoiceSummary } from "@/lib/invoice/archive";
 import { listDrafts, type DraftSummary } from "@/lib/invoice/drafts";
 import { formatMoney } from "@/lib/currency/format";
-import type { Currency, InvoiceStatus } from "@/types/invoice";
+import type { Currency, Invoice, InvoiceStatus } from "@/types/invoice";
 import { FadeIn } from "@/components/ui/FadeIn";
 import { StaggeredList } from "@/components/ui/StaggeredList";
+import { InvoiceDetail } from "@/components/invoice/InvoiceDetail";
 
 type FilterStatus = "all" | InvoiceStatus;
 
@@ -70,6 +71,7 @@ export default function DashboardModule({ onNavigate }: DashboardModuleProps) {
     typeof window !== "undefined" ? listDrafts() : []
   );
   const [filter, setFilter] = useState<FilterStatus>("all");
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
   const refresh = useCallback(() => {
     setArchived(listArchived());
@@ -137,6 +139,32 @@ export default function DashboardModule({ onNavigate }: DashboardModuleProps) {
     { label: "Outstanding", monoLabel: "outstanding", value: formatMoney(kpis.totalOutstanding, kpis.currency, { decimals: false }), accent: isMono ? "text-neutral-900" : "text-amber-700" },
     { label: "Overdue", monoLabel: "overdue", value: String(kpis.overdueCount), accent: kpis.overdueCount > 0 ? (isMono ? "text-neutral-900" : "text-red-600") : (isMono ? "text-neutral-400" : "text-neutral-400") },
   ], [kpis, isMono]);
+
+  const handleRowClick = useCallback((id: string, source: "archived" | "draft") => {
+    if (source !== "archived") return;
+    const inv = loadArchived(id);
+    if (inv) setSelectedInvoice(inv);
+  }, []);
+
+  const handleDetailUpdated = useCallback(() => {
+    refresh();
+    // Reload the selected invoice to reflect status change
+    if (selectedInvoice) {
+      const updated = loadArchived(selectedInvoice.id);
+      if (updated) setSelectedInvoice(updated);
+      else setSelectedInvoice(null);
+    }
+  }, [refresh, selectedInvoice]);
+
+  if (selectedInvoice) {
+    return (
+      <InvoiceDetail
+        invoice={selectedInvoice}
+        onClose={() => setSelectedInvoice(null)}
+        onUpdated={handleDetailUpdated}
+      />
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -209,7 +237,11 @@ export default function DashboardModule({ onNavigate }: DashboardModuleProps) {
           {filtered.map((inv) => {
             const overdue = isOverdue(inv.dueDate, inv.status) && inv.status !== "paid";
             return (
-              <div key={`${inv.source}-${inv.id}`} className={`grid grid-cols-12 gap-4 items-center ${t.cardBg} ${t.cardRadius} ${isMono ? "py-2" : "px-4 py-3"} ${t.cardShadow} ${t.cardHoverShadow} transition-shadow`}>
+              <div
+                key={`${inv.source}-${inv.id}`}
+                onClick={() => handleRowClick(inv.id, inv.source)}
+                className={`grid grid-cols-12 gap-4 items-center ${t.cardBg} ${t.cardRadius} ${isMono ? "py-2" : "px-4 py-3"} ${t.cardShadow} ${t.cardHoverShadow} transition-shadow ${inv.source === "archived" ? "cursor-pointer" : ""}`}
+              >
                 <div className={`col-span-2 ${isMono ? "text-[13px] font-medium" : "text-sm font-medium"} ${t.inputText}`}>#{inv.number}</div>
                 <div className={`col-span-3 ${isMono ? "text-[13px]" : "text-sm"} ${t.inputText} truncate`}>{inv.customerName || (inv.source === "draft" ? "Draft" : "\u2014")}</div>
                 <div className={`col-span-2 ${isMono ? "text-[13px]" : "text-xs"} ${t.labelColor}`}>{formatDate(inv.issueDate)}</div>
