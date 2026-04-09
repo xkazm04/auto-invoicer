@@ -6,6 +6,7 @@ import type { Currency, Invoice, LineItem, Party } from "@/types/invoice";
 import { computeInvoiceTotals, nextStatus } from "@/types/invoice";
 import { createSampleInvoice, createEmptyLineItem } from "@/lib/invoice/sample";
 import { downloadInvoicePDF } from "@/lib/pdf/download";
+import { validateInvoice, type ValidationErrors } from "@/lib/invoice/validation";
 
 type PartyKey = "supplier" | "customer";
 
@@ -21,6 +22,12 @@ function statusLabel(status: Invoice["status"]): string {
   return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
+function FieldError({ path, errors }: { path: string; errors: ValidationErrors }) {
+  const msg = errors[path];
+  if (!msg) return null;
+  return <span className="text-[10px] text-red-500 mt-0.5 block">{msg}</span>;
+}
+
 export function InvoiceForm() {
   const { theme } = useTheme();
   const t = theme;
@@ -28,7 +35,15 @@ export function InvoiceForm() {
 
   const [invoice, setInvoice] = useState<Invoice>(createSampleInvoice);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
+  const [hasAttemptedCreate, setHasAttemptedCreate] = useState(false);
   const totals = computeInvoiceTotals(invoice);
+
+  const revalidate = useCallback((inv: Invoice) => {
+    const result = validateInvoice(inv);
+    setValidationErrors(result.errors);
+    return result.success;
+  }, []);
 
   const handleDownloadPDF = useCallback(async () => {
     setIsGenerating(true);
@@ -43,31 +58,40 @@ export function InvoiceForm() {
 
   const updateField = useCallback(
     <K extends keyof Invoice>(key: K, value: Invoice[K]) => {
-      setInvoice((prev) => ({ ...prev, [key]: value }));
+      setInvoice((prev) => {
+        const next = { ...prev, [key]: value };
+        if (hasAttemptedCreate) revalidate(next);
+        return next;
+      });
     },
-    []
+    [hasAttemptedCreate, revalidate]
   );
 
   const updateParty = useCallback(
     (which: PartyKey, key: keyof Party, value: string) => {
-      setInvoice((prev) => ({
-        ...prev,
-        [which]: { ...prev[which], [key]: value },
-      }));
+      setInvoice((prev) => {
+        const next = { ...prev, [which]: { ...prev[which], [key]: value } };
+        if (hasAttemptedCreate) revalidate(next);
+        return next;
+      });
     },
-    []
+    [hasAttemptedCreate, revalidate]
   );
 
   const updateLineItem = useCallback(
     <K extends keyof LineItem>(id: string, key: K, value: LineItem[K]) => {
-      setInvoice((prev) => ({
-        ...prev,
-        lineItems: prev.lineItems.map((item) =>
-          item.id === id ? { ...item, [key]: value } : item
-        ),
-      }));
+      setInvoice((prev) => {
+        const next = {
+          ...prev,
+          lineItems: prev.lineItems.map((item) =>
+            item.id === id ? { ...item, [key]: value } : item
+          ),
+        };
+        if (hasAttemptedCreate) revalidate(next);
+        return next;
+      });
     },
-    []
+    [hasAttemptedCreate, revalidate]
   );
 
   const addLineItem = useCallback(() => {
@@ -119,9 +143,10 @@ export function InvoiceForm() {
                 type="text"
                 value={invoice.number}
                 onChange={(e) => updateField("number", e.target.value)}
-                className={`${isMono ? "text-sm font-medium w-24" : "text-5xl font-extralight w-64"} ${t.headerNumber} tracking-tight bg-transparent focus:outline-none`}
+                className={`${isMono ? "text-sm font-medium w-24" : "text-5xl font-extralight w-64"} ${t.headerNumber} tracking-tight bg-transparent focus:outline-none ${hasAttemptedCreate && validationErrors["number"] ? "border-b border-red-400" : ""}`}
               />
             </div>
+            {hasAttemptedCreate && <FieldError path="number" errors={validationErrors} />}
           </div>
           <div className={t.id === "paper-perfect" ? "pb-1" : ""}>
             <button
@@ -209,6 +234,7 @@ export function InvoiceForm() {
                 onChange={(e) => updateParty("supplier", "name", e.target.value)}
                 className={`w-full ${isMono ? "text-xs" : "text-base font-medium"} ${t.inputText} ${t.inputPlaceholder} bg-transparent focus:outline-none ${isMono ? "border-b border-neutral-100 pb-1 focus:border-neutral-900 transition-colors" : ""}`}
               />
+              {hasAttemptedCreate && <FieldError path="supplier.name" errors={validationErrors} />}
               <div className={`grid grid-cols-2 gap-${isMono ? "2" : "3"}`}>
                 <div>
                   <label className={`text-[9px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>Tax ID</label>
@@ -268,6 +294,7 @@ export function InvoiceForm() {
                 onChange={(e) => updateParty("customer", "name", e.target.value)}
                 className={`w-full ${isMono ? "text-xs" : "text-base font-medium"} ${t.inputText} ${t.inputPlaceholder} bg-transparent focus:outline-none ${isMono ? "border-b border-neutral-100 pb-1 focus:border-neutral-900 transition-colors" : ""}`}
               />
+              {hasAttemptedCreate && <FieldError path="customer.name" errors={validationErrors} />}
               <div className={`grid grid-cols-2 gap-${isMono ? "2" : "3"}`}>
                 <div>
                   <label className={`text-[9px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>Tax ID</label>
@@ -313,6 +340,7 @@ export function InvoiceForm() {
           ) : (
             <span className={`text-[9px] uppercase tracking-widest ${t.labelColor}`}>Items</span>
           )}
+          {hasAttemptedCreate && <FieldError path="lineItems" errors={validationErrors} />}
           <button
             type="button"
             onClick={addLineItem}
@@ -457,7 +485,15 @@ export function InvoiceForm() {
         </button>
         <button
           type="button"
-          className={`${isMono ? "text-[10px] uppercase tracking-widest border-b border-neutral-900 pb-0.5 hover:border-neutral-400" : "px-8 py-3"} ${t.primaryBtnBg} ${t.primaryBtnHoverBg} ${t.primaryBtnText} ${t.primaryBtnRadius} ${t.primaryBtnShadow} transition-all`}
+          onClick={() => {
+            setHasAttemptedCreate(true);
+            const valid = revalidate(invoice);
+            if (valid) {
+              alert("Invoice created successfully!");
+            }
+          }}
+          disabled={hasAttemptedCreate && Object.keys(validationErrors).length > 0}
+          className={`${isMono ? "text-[10px] uppercase tracking-widest border-b border-neutral-900 pb-0.5 hover:border-neutral-400" : "px-8 py-3"} ${t.primaryBtnBg} ${t.primaryBtnHoverBg} ${t.primaryBtnText} ${t.primaryBtnRadius} ${t.primaryBtnShadow} transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {isMono ? "Create" : "Create Invoice"}
         </button>
