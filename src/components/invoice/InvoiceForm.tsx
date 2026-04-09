@@ -42,6 +42,7 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [hasAttemptedCreate, setHasAttemptedCreate] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const totals = computeInvoiceTotals(invoice);
 
   const revalidate = useCallback((inv: Invoice) => {
@@ -472,6 +473,32 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
         </div>
       </div>
 
+      {/* Success Confirmation */}
+      {showSuccess && (
+        <div
+          onClick={() => setShowSuccess(false)}
+          className={`mb-8 ${isMono ? "border border-neutral-900 p-4" : "rounded-2xl p-6 shadow-[0_4px_16px_rgba(0,0,0,0.06)]"} ${isMono ? "bg-white" : "bg-emerald-50"} cursor-pointer transition-all`}
+        >
+          <div className="flex items-center gap-3">
+            {!isMono && (
+              <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            )}
+            <div>
+              <div className={`${isMono ? "text-xs font-medium" : "text-sm font-semibold text-emerald-900"}`}>
+                {isMono ? "OK" : "Invoice Created"}
+              </div>
+              <div className={`${isMono ? "text-[10px] text-neutral-500" : "text-xs text-emerald-700"} mt-0.5`}>
+                #{invoice.number} — {formatAmount(totals.total, isMono, true)} {invoice.currency}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Actions */}
       <div className={`flex gap-4 justify-end ${isMono ? "border-t border-neutral-200 pt-6" : ""}`}>
         <button
@@ -495,7 +522,8 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
             setHasAttemptedCreate(true);
             const valid = revalidate(invoice);
             if (valid) {
-              alert("Invoice created successfully!");
+              setShowSuccess(true);
+              setTimeout(() => setShowSuccess(false), 4000);
             }
           }}
           disabled={hasAttemptedCreate && Object.keys(validationErrors).length > 0}
