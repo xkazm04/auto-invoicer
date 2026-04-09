@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import type { VatLookupRequest, VatLookupResult } from "@/types/vat";
 
+const EMPTY_RESULT: VatLookupResult = {
+  valid: false, name: "", address: "", countryCode: "",
+  registrationId: "", taxId: "", legalForm: "",
+};
+
 async function lookupARES(ico: string): Promise<VatLookupResult> {
   const url = `https://ares.gov.cz/ekonomicke-subjekty-v-be/rest/ekonomicke-subjekty/${encodeURIComponent(ico)}`;
   const res = await fetch(url, {
@@ -9,24 +14,31 @@ async function lookupARES(ico: string): Promise<VatLookupResult> {
   });
 
   if (!res.ok) {
-    return { valid: false, name: "", address: "", countryCode: "CZ", error: `ARES returned ${res.status}` };
+    return { ...EMPTY_RESULT, countryCode: "CZ", error: `ARES returned ${res.status}` };
   }
 
   const data = await res.json();
   const name = data.obchodniJmeno || data.nazev || "";
   const addr = data.sidlo;
-  const addressParts: string[] = [];
-  if (addr) {
-    if (addr.nazevUlice) addressParts.push(`${addr.nazevUlice} ${addr.cisloDomovni || ""}`.trim());
-    if (addr.nazevObce) addressParts.push(addr.nazevObce);
-    if (addr.psc) addressParts.push(String(addr.psc));
+
+  // Prefer textovaAdresa (full pre-formatted address) over manual assembly
+  let address = addr?.textovaAdresa || "";
+  if (!address && addr) {
+    const parts: string[] = [];
+    if (addr.nazevUlice) parts.push(`${addr.nazevUlice} ${addr.cisloDomovni || ""}`.trim());
+    if (addr.nazevObce) parts.push(addr.nazevObce);
+    if (addr.psc) parts.push(String(addr.psc));
+    address = parts.join(", ");
   }
 
   return {
     valid: true,
     name,
-    address: addressParts.join(", "),
+    address,
     countryCode: "CZ",
+    registrationId: data.ico ? String(data.ico) : "",
+    taxId: data.dic || "",
+    legalForm: data.pravniForma ? String(data.pravniForma) : "",
   };
 }
 
@@ -40,7 +52,7 @@ async function lookupVIES(countryCode: string, vatNumber: string): Promise<VatLo
   });
 
   if (!res.ok) {
-    return { valid: false, name: "", address: "", countryCode, error: `VIES returned ${res.status}` };
+    return { ...EMPTY_RESULT, countryCode, error: `VIES returned ${res.status}` };
   }
 
   const data = await res.json();
@@ -49,6 +61,9 @@ async function lookupVIES(countryCode: string, vatNumber: string): Promise<VatLo
     name: data.name || "",
     address: data.address || "",
     countryCode,
+    registrationId: "",
+    taxId: `${countryCode}${vatNumber}`,
+    legalForm: "",
   };
 }
 
@@ -59,7 +74,7 @@ export async function POST(request: Request) {
 
     if (!vatId || !countryCode) {
       return NextResponse.json(
-        { valid: false, name: "", address: "", countryCode: "", error: "vatId and countryCode are required" },
+        { ...EMPTY_RESULT, error: "vatId and countryCode are required" },
         { status: 400 }
       );
     }
@@ -73,7 +88,6 @@ export async function POST(request: Request) {
     }
 
     // EU VAT number lookup via VIES
-    // Extract country prefix if vatId starts with 2-letter code
     let viesCountry = cc;
     let viesNumber = vatId.replace(/\s/g, "");
     if (/^[A-Z]{2}/.test(viesNumber)) {
@@ -86,7 +100,7 @@ export async function POST(request: Request) {
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json(
-      { valid: false, name: "", address: "", countryCode: "", error: message },
+      { ...EMPTY_RESULT, error: message },
       { status: 500 }
     );
   }
