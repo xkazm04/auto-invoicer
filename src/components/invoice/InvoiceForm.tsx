@@ -7,16 +7,8 @@ import { computeInvoiceTotals, nextStatus } from "@/types/invoice";
 import { createSampleInvoice, createEmptyLineItem } from "@/lib/invoice/sample";
 import { downloadInvoicePDF } from "@/lib/pdf/download";
 import { validateInvoice, type ValidationErrors } from "@/lib/invoice/validation";
+import { formatMoney } from "@/lib/currency/format";
 import { PartySection } from "./PartySection";
-
-
-function formatAmount(value: number, isMono: boolean, isTotal: boolean): string {
-  const fractionDigits = isTotal || isMono ? 0 : 2;
-  return value.toLocaleString("en-US", {
-    minimumFractionDigits: fractionDigits,
-    maximumFractionDigits: fractionDigits,
-  });
-}
 
 function statusLabel(status: Invoice["status"]): string {
   return status.charAt(0).toUpperCase() + status.slice(1);
@@ -325,7 +317,7 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
                       className={`col-span-2 ${isMono ? "text-[13px] text-neutral-600" : "text-[15px]"} ${t.id === "paper-perfect" ? t.inputText : ""} text-right bg-transparent focus:outline-none`}
                     />
                     <div className={`${isMono ? "col-span-1" : "col-span-2"} ${isMono ? "text-[13px]" : "text-[15px] font-semibold"} ${t.inputText} text-right tabular-nums`}>
-                      {formatAmount(lineAmount, isMono, false)}
+                      {formatMoney(lineAmount, invoice.currency, { symbolOnly: true })}
                     </div>
                     <button
                       type="button"
@@ -360,13 +352,13 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
               <div className={`flex justify-between items-center ${isMono ? "py-1" : ""}`}>
                 <span className={`${isMono ? "text-xs" : "text-sm"} ${t.summaryLabelColor}`}>Subtotal</span>
                 <span className={`${isMono ? "text-xs" : "text-sm font-medium"} ${t.summaryValueColor} tabular-nums`}>
-                  {formatAmount(totals.subtotal, isMono, false)}
+                  {formatMoney(totals.subtotal, invoice.currency, { symbolOnly: true })}
                 </span>
               </div>
               <div className={`flex justify-between items-center ${isMono ? "py-1" : ""}`}>
                 <span className={`${isMono ? "text-xs" : "text-sm"} ${t.summaryLabelColor}`}>VAT {Math.round(invoice.vatRate * 100)}%</span>
                 <span className={`${isMono ? "text-xs" : "text-sm font-medium"} ${t.summaryValueColor} tabular-nums`}>
-                  {formatAmount(totals.vat, isMono, false)}
+                  {formatMoney(totals.vat, invoice.currency, { symbolOnly: true })}
                 </span>
               </div>
               <div className={`${isMono ? "border-t mt-1 py-2" : "h-px my-3"} ${t.summaryDivider}`} />
@@ -378,7 +370,7 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
                 )}
                 <div className={t.id === "paper-perfect" ? "text-right" : ""}>
                   <span className={`${isMono ? "text-xs font-medium" : "text-3xl font-light"} ${t.totalValueColor} tabular-nums ${t.id === "paper-perfect" ? "tracking-tight" : ""}`}>
-                    {formatAmount(totals.total, isMono, true)}
+                    {formatMoney(totals.total, invoice.currency, { decimals: false, symbolOnly: true })}
                   </span>
                   <span className={`${isMono ? "text-xs" : "text-sm ml-1.5 font-medium"} ${t.totalCurrencyColor}`}>
                     {isMono ? " " : ""}{invoice.currency}
@@ -464,7 +456,7 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
                 {isMono ? "OK" : "Invoice Created"}
               </div>
               <div className={`${isMono ? "text-xs text-neutral-500" : "text-xs text-emerald-700"} mt-0.5`}>
-                #{invoice.number} — {formatAmount(totals.total, isMono, true)} {invoice.currency}
+                #{invoice.number} — {formatMoney(totals.total, invoice.currency, { decimals: false })}
               </div>
             </div>
           </div>

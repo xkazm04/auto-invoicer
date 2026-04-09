@@ -3,17 +3,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTheme } from "./ThemeContext";
 import { listDrafts, deleteDraft, type DraftSummary } from "@/lib/invoice/drafts";
+import { formatMoney } from "@/lib/currency/format";
+import type { Currency } from "@/types/invoice";
 
 interface DraftsPanelProps {
   onLoadDraft: (id: string) => void;
   onNewInvoice: () => void;
-}
-
-function formatCurrency(value: number, currency: string): string {
-  return value.toLocaleString("en-US", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }) + " " + currency;
 }
 
 function formatDate(iso: string): string {
@@ -100,7 +95,7 @@ export function DraftsPanel({ onLoadDraft, onNewInvoice }: DraftsPanelProps) {
                 </div>
                 <div className="flex items-center gap-2 ml-2">
                   <span className={`${isMono ? "text-xs" : "text-xs font-medium"} ${t.summaryValueColor} tabular-nums whitespace-nowrap`}>
-                    {formatCurrency(draft.total, draft.currency)}
+                    {formatMoney(draft.total, draft.currency as Currency, { decimals: false })}
                   </span>
                   <button
                     type="button"

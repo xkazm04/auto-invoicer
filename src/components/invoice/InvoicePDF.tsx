@@ -9,6 +9,7 @@ import type { Invoice } from "@/types/invoice";
 import { computeInvoiceTotals, computeLineItemAmount } from "@/types/invoice";
 import type { ThemeId } from "./theme";
 import { getPdfTheme, type PdfTheme } from "@/lib/pdf/pdfTheme";
+import { formatMoney } from "@/lib/currency/format";
 
 function buildStyles(t: PdfTheme) {
   const c = t.colors;
@@ -218,18 +219,12 @@ function buildStyles(t: PdfTheme) {
   });
 }
 
-function formatMoney(value: number): string {
-  return value.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+function fmtLine(value: number, currency: Invoice["currency"]): string {
+  return formatMoney(value, currency, { symbolOnly: true });
 }
 
-function formatTotal(value: number): string {
-  return value.toLocaleString("en-US", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
+function fmtTotal(value: number, currency: Invoice["currency"]): string {
+  return formatMoney(value, currency, { decimals: false, symbolOnly: true });
 }
 
 export interface InvoicePDFProps {
@@ -343,9 +338,9 @@ export function InvoicePDF({ invoice, themeId = "paper-perfect" }: InvoicePDFPro
               <View key={item.id} style={isLast ? styles.tableRowLast : styles.tableRow}>
                 <Text style={styles.colDescription}>{item.description || "—"}</Text>
                 <Text style={styles.colQty}>{item.quantity}</Text>
-                <Text style={styles.colPrice}>{formatMoney(item.unitPrice)}</Text>
+                <Text style={styles.colPrice}>{fmtLine(item.unitPrice, invoice.currency)}</Text>
                 <Text style={styles.colAmount}>
-                  {formatMoney(computeLineItemAmount(item))}
+                  {fmtLine(computeLineItemAmount(item), invoice.currency)}
                 </Text>
               </View>
             );
@@ -357,19 +352,19 @@ export function InvoicePDF({ invoice, themeId = "paper-perfect" }: InvoicePDFPro
           <View style={styles.totalsBox}>
             <View style={styles.totalsRow}>
               <Text style={styles.totalsLabel}>Subtotal</Text>
-              <Text style={styles.totalsValue}>{formatMoney(totals.subtotal)}</Text>
+              <Text style={styles.totalsValue}>{fmtLine(totals.subtotal, invoice.currency)}</Text>
             </View>
             <View style={styles.totalsRow}>
               <Text style={styles.totalsLabel}>
                 VAT {Math.round(invoice.vatRate * 100)}%
               </Text>
-              <Text style={styles.totalsValue}>{formatMoney(totals.vat)}</Text>
+              <Text style={styles.totalsValue}>{fmtLine(totals.vat, invoice.currency)}</Text>
             </View>
             <View style={styles.totalsDivider} />
             <View style={styles.grandTotalRow}>
               <Text style={styles.grandTotalLabel}>Total</Text>
               <View style={{ flexDirection: "row", alignItems: "baseline" }}>
-                <Text style={styles.grandTotalValue}>{formatTotal(totals.total)}</Text>
+                <Text style={styles.grandTotalValue}>{fmtTotal(totals.total, invoice.currency)}</Text>
                 <Text style={styles.grandTotalCurrency}>{invoice.currency}</Text>
               </View>
             </View>
