@@ -6,8 +6,10 @@ import { useTheme } from "@/components/invoice/ThemeContext";
 import { themes } from "@/components/invoice/theme";
 
 const NAV_ITEMS = [
+  { href: "/dashboard", label: "Dashboard", monoLabel: "dash" },
   { href: "/invoices", label: "Invoices", monoLabel: "inv" },
   { href: "/contacts", label: "Contacts", monoLabel: "con" },
+  { href: "/settings", label: "Settings", monoLabel: "cfg" },
 ];
 
 export function AppHeader() {
