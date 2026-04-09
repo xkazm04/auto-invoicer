@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "@/components/invoice/ThemeContext";
+import { themes } from "@/components/invoice/theme";
 
 const NAV_ITEMS = [
   { href: "/invoices", label: "Invoices", monoLabel: "inv" },
@@ -11,12 +12,12 @@ const NAV_ITEMS = [
 
 export function AppHeader() {
   const pathname = usePathname();
-  const { theme: t } = useTheme();
+  const { theme: t, setTheme } = useTheme();
   const isMono = t.id === "minimal-mono";
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-30 ${
+      className={`fixed top-0 left-0 right-0 z-50 ${
         isMono
           ? "border-b border-neutral-200 bg-white"
           : "bg-white/80 backdrop-blur-md shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
@@ -29,12 +30,8 @@ export function AppHeader() {
               InvoiceFlow
             </span>
           ) : (
-            <span
-              className={`${
-                isMono ? "text-[10px] uppercase tracking-[0.2em]" : "text-sm font-semibold"
-              } text-neutral-800`}
-            >
-              {isMono ? "invoiceflow" : "InvoiceFlow"}
+            <span className="text-xs uppercase tracking-[0.15em] font-semibold text-neutral-800">
+              invoiceflow
             </span>
           )}
 
@@ -48,7 +45,7 @@ export function AppHeader() {
                   href={item.href}
                   className={`${
                     isMono
-                      ? "text-[10px] uppercase tracking-widest px-2 py-1"
+                      ? "text-xs uppercase tracking-widest px-2 py-1"
                       : "text-xs font-medium px-3 py-1.5 rounded-lg"
                   } transition-colors ${
                     isActive
@@ -56,7 +53,7 @@ export function AppHeader() {
                         ? "text-neutral-900 border-b border-neutral-900"
                         : "text-neutral-900 bg-neutral-100"
                       : isMono
-                        ? "text-neutral-400 hover:text-neutral-700"
+                        ? "text-neutral-500 hover:text-neutral-800"
                         : "text-neutral-500 hover:text-neutral-800 hover:bg-neutral-50"
                   }`}
                 >
@@ -65,6 +62,23 @@ export function AppHeader() {
               );
             })}
           </nav>
+        </div>
+
+        {/* Theme toggle */}
+        <div className="flex gap-1">
+          {Object.values(themes).map((theme) => (
+            <button
+              key={theme.id}
+              onClick={() => setTheme(theme.id)}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+                t.id === theme.id
+                  ? "bg-neutral-900 text-white shadow-sm"
+                  : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+              }`}
+            >
+              {isMono ? (theme.id === "minimal-mono" ? "mono" : "paper") : theme.name}
+            </button>
+          ))}
         </div>
       </div>
     </header>
