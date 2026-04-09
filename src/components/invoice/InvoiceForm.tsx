@@ -56,7 +56,7 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
   const handleDownloadPDF = useCallback(async () => {
     setIsGenerating(true);
     try {
-      await downloadInvoicePDF(invoice);
+      await downloadInvoicePDF(invoice, t.id);
     } catch (err) {
       console.error("Failed to generate invoice PDF", err);
     } finally {
