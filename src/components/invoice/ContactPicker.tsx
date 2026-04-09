@@ -51,7 +51,7 @@ export function ContactPicker({ onSelect }: ContactPickerProps) {
       <button
         type="button"
         onClick={toggle}
-        className={`${isMono ? "text-[9px]" : "text-[10px] font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} uppercase tracking-wider transition-colors`}
+        className={`${isMono ? "text-[13px]" : "text-xs font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} uppercase tracking-wider transition-colors`}
         title="Pick from saved contacts"
       >
         {isMono ? "[ contacts ]" : "Contacts"}
@@ -62,7 +62,7 @@ export function ContactPicker({ onSelect }: ContactPickerProps) {
           className={`absolute top-full left-0 mt-1 z-40 min-w-[200px] ${isMono ? "border border-neutral-200 bg-white" : "rounded-xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.08)]"} overflow-hidden`}
         >
           {contacts.length === 0 ? (
-            <div className={`${isMono ? "text-[10px] p-2" : "text-xs p-3"} ${t.labelColor}`}>
+            <div className={`${isMono ? "text-xs p-2" : "text-xs p-3"} ${t.labelColor}`}>
               No saved contacts
             </div>
           ) : (
@@ -74,11 +74,11 @@ export function ContactPicker({ onSelect }: ContactPickerProps) {
                   onClick={() => handleSelect(contact)}
                   className={`w-full text-left ${isMono ? "px-2 py-1.5" : "px-3 py-2"} hover:bg-neutral-50 transition-colors`}
                 >
-                  <div className={`${isMono ? "text-[11px]" : "text-sm"} ${t.inputText} font-medium truncate`}>
+                  <div className={`${isMono ? "text-[13px]" : "text-sm"} ${t.inputText} font-medium truncate`}>
                     {contact.name}
                   </div>
                   {contact.taxId && (
-                    <div className={`${isMono ? "text-[9px]" : "text-xs"} ${t.labelColor} truncate`}>
+                    <div className={`${isMono ? "text-[13px]" : "text-xs"} ${t.labelColor} truncate`}>
                       {contact.taxId}
                     </div>
                   )}

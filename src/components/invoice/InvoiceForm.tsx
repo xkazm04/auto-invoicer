@@ -27,7 +27,7 @@ function statusLabel(status: Invoice["status"]): string {
 function FieldError({ path, errors }: { path: string; errors: ValidationErrors }) {
   const msg = errors[path];
   if (!msg) return null;
-  return <span className="text-[10px] text-red-500 mt-0.5 block">{msg}</span>;
+  return <span className="text-xs text-red-500 mt-0.5 block">{msg}</span>;
 }
 
 export interface InvoiceFormProps {
@@ -158,7 +158,7 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
                 Invoice
               </span>
             ) : (
-              <span className={`text-[9px] uppercase tracking-widest ${t.headerTitle} block mb-1`}>
+              <span className={`text-[13px] uppercase tracking-widest ${t.headerTitle} block mb-1`}>
                 Invoice
               </span>
             )}
@@ -181,7 +181,7 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
               title="Click to advance status"
             >
               <div className={`w-2 h-2 rounded-full ${t.statusDot} ${t.statusDotGlow}`} />
-              <span className={`${isMono ? "text-[10px]" : "text-sm font-medium"} ${t.statusText}`}>
+              <span className={`${isMono ? "text-xs" : "text-sm font-medium"} ${t.statusText}`}>
                 {statusLabel(invoice.status)}
               </span>
             </button>
@@ -209,7 +209,7 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
                 type="date"
                 value={invoice[field.key]}
                 onChange={(e) => updateField(field.key, e.target.value)}
-                className={`w-full ${isMono ? "text-[11px]" : "text-[15px] font-medium"} ${t.inputText} bg-transparent focus:outline-none`}
+                className={`w-full ${isMono ? "text-[13px]" : "text-[15px] font-medium"} ${t.inputText} bg-transparent focus:outline-none`}
               />
             </div>
           ))}
@@ -222,7 +222,7 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
             <select
               value={invoice.currency}
               onChange={(e) => updateField("currency", e.target.value as Currency)}
-              className={`w-full ${isMono ? "text-[11px]" : "text-[15px] font-medium"} ${t.inputText} bg-transparent focus:outline-none cursor-pointer`}
+              className={`w-full ${isMono ? "text-[13px]" : "text-[15px] font-medium"} ${t.inputText} bg-transparent focus:outline-none cursor-pointer`}
             >
               <option value="CZK">CZK</option>
               <option value="EUR">EUR</option>
@@ -248,12 +248,12 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
               {t.useHandwritten ? (
                 <span className={`font-[family-name:var(--font-caveat)] text-2xl ${t.partyIconColor}`}>From</span>
               ) : (
-                <span className={`text-[9px] uppercase tracking-widest ${t.labelColor}`}>Supplier</span>
+                <span className={`text-[13px] uppercase tracking-widest ${t.labelColor}`}>Supplier</span>
               )}
               <div className="ml-auto flex items-center gap-2">
                 <ContactPicker onSelect={(p) => fillParty("supplier", p)} />
                 {invoice.supplier.name.trim() && (
-                  <button type="button" onClick={() => handleSaveContact("supplier")} className={`${isMono ? "text-[9px]" : "text-[10px] font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} transition-colors`}>
+                  <button type="button" onClick={() => handleSaveContact("supplier")} className={`${isMono ? "text-[13px]" : "text-xs font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} transition-colors`}>
                     {savedFlash === "supplier" ? (isMono ? "ok" : "Saved!") : (isMono ? "save" : "Save")}
                   </button>
                 )}
@@ -270,34 +270,34 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
               {hasAttemptedCreate && <FieldError path="supplier.name" errors={validationErrors} />}
               <div className={`grid grid-cols-2 gap-${isMono ? "2" : "3"}`}>
                 <div>
-                  <label className={`text-[9px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>Tax ID</label>
+                  <label className={`text-[13px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>Tax ID</label>
                   <input
                     type="text"
                     placeholder="000-000-000"
                     value={invoice.supplier.taxId}
                     onChange={(e) => updateParty("supplier", "taxId", e.target.value)}
-                    className={`w-full ${isMono ? "text-[10px]" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} ${t.inputBg} ${t.inputRadius} ${t.inputPadding} focus:outline-none ${t.inputFocusBg} ${isMono ? "border-b border-neutral-100 focus:border-neutral-900" : ""} transition-colors`}
+                    className={`w-full ${isMono ? "text-xs" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} ${t.inputBg} ${t.inputRadius} ${t.inputPadding} focus:outline-none ${t.inputFocusBg} ${isMono ? "border-b border-neutral-100 focus:border-neutral-900" : ""} transition-colors`}
                   />
                 </div>
                 <div>
-                  <label className={`text-[9px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>VAT ID</label>
+                  <label className={`text-[13px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>VAT ID</label>
                   <input
                     type="text"
                     placeholder="CZ000000000"
                     value={invoice.supplier.vatId}
                     onChange={(e) => updateParty("supplier", "vatId", e.target.value)}
-                    className={`w-full ${isMono ? "text-[10px]" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} ${t.inputBg} ${t.inputRadius} ${t.inputPadding} focus:outline-none ${t.inputFocusBg} ${isMono ? "border-b border-neutral-100 focus:border-neutral-900" : ""} transition-colors`}
+                    className={`w-full ${isMono ? "text-xs" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} ${t.inputBg} ${t.inputRadius} ${t.inputPadding} focus:outline-none ${t.inputFocusBg} ${isMono ? "border-b border-neutral-100 focus:border-neutral-900" : ""} transition-colors`}
                   />
                 </div>
               </div>
               <div>
-                <label className={`text-[9px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>Address</label>
+                <label className={`text-[13px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>Address</label>
                 <textarea
                   placeholder="Street, City, Country"
                   rows={2}
                   value={invoice.supplier.address}
                   onChange={(e) => updateParty("supplier", "address", e.target.value)}
-                  className={`w-full ${isMono ? "text-[10px]" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} bg-transparent focus:outline-none resize-none leading-relaxed ${isMono ? "border-b border-neutral-100 pb-1 focus:border-neutral-900 transition-colors" : ""}`}
+                  className={`w-full ${isMono ? "text-xs" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} bg-transparent focus:outline-none resize-none leading-relaxed ${isMono ? "border-b border-neutral-100 pb-1 focus:border-neutral-900 transition-colors" : ""}`}
                 />
               </div>
             </div>
@@ -316,12 +316,12 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
               {t.useHandwritten ? (
                 <span className={`font-[family-name:var(--font-caveat)] text-2xl ${t.partyToIconColor}`}>To</span>
               ) : (
-                <span className={`text-[9px] uppercase tracking-widest ${t.labelColor}`}>Customer</span>
+                <span className={`text-[13px] uppercase tracking-widest ${t.labelColor}`}>Customer</span>
               )}
               <div className="ml-auto flex items-center gap-2">
                 <ContactPicker onSelect={(p) => fillParty("customer", p)} />
                 {invoice.customer.name.trim() && (
-                  <button type="button" onClick={() => handleSaveContact("customer")} className={`${isMono ? "text-[9px]" : "text-[10px] font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} transition-colors`}>
+                  <button type="button" onClick={() => handleSaveContact("customer")} className={`${isMono ? "text-[13px]" : "text-xs font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} transition-colors`}>
                     {savedFlash === "customer" ? (isMono ? "ok" : "Saved!") : (isMono ? "save" : "Save")}
                   </button>
                 )}
@@ -338,34 +338,34 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
               {hasAttemptedCreate && <FieldError path="customer.name" errors={validationErrors} />}
               <div className={`grid grid-cols-2 gap-${isMono ? "2" : "3"}`}>
                 <div>
-                  <label className={`text-[9px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>Tax ID</label>
+                  <label className={`text-[13px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>Tax ID</label>
                   <input
                     type="text"
                     placeholder="000-000-000"
                     value={invoice.customer.taxId}
                     onChange={(e) => updateParty("customer", "taxId", e.target.value)}
-                    className={`w-full ${isMono ? "text-[10px]" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} ${t.inputBg} ${t.inputRadius} ${t.inputPadding} focus:outline-none ${t.inputFocusBg} ${isMono ? "border-b border-neutral-100 focus:border-neutral-900" : ""} transition-colors`}
+                    className={`w-full ${isMono ? "text-xs" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} ${t.inputBg} ${t.inputRadius} ${t.inputPadding} focus:outline-none ${t.inputFocusBg} ${isMono ? "border-b border-neutral-100 focus:border-neutral-900" : ""} transition-colors`}
                   />
                 </div>
                 <div>
-                  <label className={`text-[9px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>VAT ID</label>
+                  <label className={`text-[13px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>VAT ID</label>
                   <input
                     type="text"
                     placeholder="CZ000000000"
                     value={invoice.customer.vatId}
                     onChange={(e) => updateParty("customer", "vatId", e.target.value)}
-                    className={`w-full ${isMono ? "text-[10px]" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} ${t.inputBg} ${t.inputRadius} ${t.inputPadding} focus:outline-none ${t.inputFocusBg} ${isMono ? "border-b border-neutral-100 focus:border-neutral-900" : ""} transition-colors`}
+                    className={`w-full ${isMono ? "text-xs" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} ${t.inputBg} ${t.inputRadius} ${t.inputPadding} focus:outline-none ${t.inputFocusBg} ${isMono ? "border-b border-neutral-100 focus:border-neutral-900" : ""} transition-colors`}
                   />
                 </div>
               </div>
               <div>
-                <label className={`text-[9px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>Address</label>
+                <label className={`text-[13px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>Address</label>
                 <textarea
                   placeholder="Street, City, Country"
                   rows={2}
                   value={invoice.customer.address}
                   onChange={(e) => updateParty("customer", "address", e.target.value)}
-                  className={`w-full ${isMono ? "text-[10px]" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} bg-transparent focus:outline-none resize-none leading-relaxed ${isMono ? "border-b border-neutral-100 pb-1 focus:border-neutral-900 transition-colors" : ""}`}
+                  className={`w-full ${isMono ? "text-xs" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} bg-transparent focus:outline-none resize-none leading-relaxed ${isMono ? "border-b border-neutral-100 pb-1 focus:border-neutral-900 transition-colors" : ""}`}
                 />
               </div>
             </div>
@@ -379,13 +379,13 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
           {t.useHandwritten ? (
             <span className={`font-[family-name:var(--font-caveat)] text-2xl ${t.sectionLabel}`}>Items</span>
           ) : (
-            <span className={`text-[9px] uppercase tracking-widest ${t.labelColor}`}>Items</span>
+            <span className={`text-[13px] uppercase tracking-widest ${t.labelColor}`}>Items</span>
           )}
           {hasAttemptedCreate && <FieldError path="lineItems" errors={validationErrors} />}
           <button
             type="button"
             onClick={addLineItem}
-            className={`${isMono ? "text-[10px]" : "text-[11px] font-semibold"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} uppercase tracking-wider transition-colors flex items-center gap-1.5 group`}
+            className={`${isMono ? "text-xs" : "text-[13px] font-semibold"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} uppercase tracking-wider transition-colors flex items-center gap-1.5 group`}
           >
             {t.id === "paper-perfect" && (
               <span className="w-5 h-5 rounded-full bg-[#EDE8E3] group-hover:bg-[#E0D9D2] flex items-center justify-center transition-colors">
@@ -425,14 +425,14 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
                       type="text"
                       value={item.description}
                       onChange={(e) => updateLineItem(item.id, "description", e.target.value)}
-                      className={`col-span-${isMono ? "6" : "5"} ${isMono ? "text-[11px]" : "text-[15px]"} ${t.inputText} bg-transparent focus:outline-none`}
+                      className={`col-span-${isMono ? "6" : "5"} ${isMono ? "text-[13px]" : "text-[15px]"} ${t.inputText} bg-transparent focus:outline-none`}
                     />
                     <input
                       type="number"
                       min="0"
                       value={item.quantity}
                       onChange={(e) => updateLineItem(item.id, "quantity", Number(e.target.value) || 0)}
-                      className={`col-span-2 ${isMono ? "text-[11px] text-neutral-600" : "text-[15px]"} ${t.id === "paper-perfect" ? t.inputText : ""} text-center bg-transparent focus:outline-none`}
+                      className={`col-span-2 ${isMono ? "text-[13px] text-neutral-600" : "text-[15px]"} ${t.id === "paper-perfect" ? t.inputText : ""} text-center bg-transparent focus:outline-none`}
                     />
                     <input
                       type="number"
@@ -440,9 +440,9 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
                       step="0.01"
                       value={item.unitPrice}
                       onChange={(e) => updateLineItem(item.id, "unitPrice", Number(e.target.value) || 0)}
-                      className={`col-span-2 ${isMono ? "text-[11px] text-neutral-600" : "text-[15px]"} ${t.id === "paper-perfect" ? t.inputText : ""} text-right bg-transparent focus:outline-none`}
+                      className={`col-span-2 ${isMono ? "text-[13px] text-neutral-600" : "text-[15px]"} ${t.id === "paper-perfect" ? t.inputText : ""} text-right bg-transparent focus:outline-none`}
                     />
-                    <div className={`${isMono ? "col-span-1" : "col-span-2"} ${isMono ? "text-[11px]" : "text-[15px] font-semibold"} ${t.inputText} text-right tabular-nums`}>
+                    <div className={`${isMono ? "col-span-1" : "col-span-2"} ${isMono ? "text-[13px]" : "text-[15px] font-semibold"} ${t.inputText} text-right tabular-nums`}>
                       {formatAmount(lineAmount, isMono, false)}
                     </div>
                     <button
@@ -476,14 +476,14 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
             )}
             <div className={`space-y-${isMono ? "0" : "3"}`}>
               <div className={`flex justify-between items-center ${isMono ? "py-1" : ""}`}>
-                <span className={`${isMono ? "text-[10px]" : "text-sm"} ${t.summaryLabelColor}`}>Subtotal</span>
-                <span className={`${isMono ? "text-[10px]" : "text-sm font-medium"} ${t.summaryValueColor} tabular-nums`}>
+                <span className={`${isMono ? "text-xs" : "text-sm"} ${t.summaryLabelColor}`}>Subtotal</span>
+                <span className={`${isMono ? "text-xs" : "text-sm font-medium"} ${t.summaryValueColor} tabular-nums`}>
                   {formatAmount(totals.subtotal, isMono, false)}
                 </span>
               </div>
               <div className={`flex justify-between items-center ${isMono ? "py-1" : ""}`}>
-                <span className={`${isMono ? "text-[10px]" : "text-sm"} ${t.summaryLabelColor}`}>VAT {Math.round(invoice.vatRate * 100)}%</span>
-                <span className={`${isMono ? "text-[10px]" : "text-sm font-medium"} ${t.summaryValueColor} tabular-nums`}>
+                <span className={`${isMono ? "text-xs" : "text-sm"} ${t.summaryLabelColor}`}>VAT {Math.round(invoice.vatRate * 100)}%</span>
+                <span className={`${isMono ? "text-xs" : "text-sm font-medium"} ${t.summaryValueColor} tabular-nums`}>
                   {formatAmount(totals.vat, isMono, false)}
                 </span>
               </div>
@@ -526,7 +526,7 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
               <div className={`${isMono ? "text-xs font-medium" : "text-sm font-semibold text-emerald-900"}`}>
                 {isMono ? "OK" : "Invoice Created"}
               </div>
-              <div className={`${isMono ? "text-[10px] text-neutral-500" : "text-xs text-emerald-700"} mt-0.5`}>
+              <div className={`${isMono ? "text-xs text-neutral-500" : "text-xs text-emerald-700"} mt-0.5`}>
                 #{invoice.number} — {formatAmount(totals.total, isMono, true)} {invoice.currency}
               </div>
             </div>
@@ -539,7 +539,7 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
         <button
           type="button"
           onClick={() => onSave?.(invoice)}
-          className={`${isMono ? "text-[10px] uppercase tracking-widest" : "px-6 py-3 text-sm font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} ${t.secondaryBtnBorder} transition-colors`}
+          className={`${isMono ? "text-xs uppercase tracking-widest" : "px-6 py-3 text-sm font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} ${t.secondaryBtnBorder} transition-colors`}
         >
           {isMono ? "Draft" : "Save Draft"}
         </button>
@@ -547,7 +547,7 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
           type="button"
           onClick={handleDownloadPDF}
           disabled={isGenerating}
-          className={`${isMono ? "text-[10px] uppercase tracking-widest" : "px-6 py-3 text-sm font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} ${t.secondaryBtnBorder} transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+          className={`${isMono ? "text-xs uppercase tracking-widest" : "px-6 py-3 text-sm font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} ${t.secondaryBtnBorder} transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {isGenerating ? (isMono ? "..." : "Generating...") : isMono ? "PDF" : "Download PDF"}
         </button>
@@ -562,7 +562,7 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
             }
           }}
           disabled={hasAttemptedCreate && Object.keys(validationErrors).length > 0}
-          className={`${isMono ? "text-[10px] uppercase tracking-widest border-b border-neutral-900 pb-0.5 hover:border-neutral-400" : "px-8 py-3"} ${t.primaryBtnBg} ${t.primaryBtnHoverBg} ${t.primaryBtnText} ${t.primaryBtnRadius} ${t.primaryBtnShadow} transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
+          className={`${isMono ? "text-xs uppercase tracking-widest border-b border-neutral-900 pb-0.5 hover:border-neutral-400" : "px-8 py-3"} ${t.primaryBtnBg} ${t.primaryBtnHoverBg} ${t.primaryBtnText} ${t.primaryBtnRadius} ${t.primaryBtnShadow} transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {isMono ? "Create" : "Create Invoice"}
         </button>

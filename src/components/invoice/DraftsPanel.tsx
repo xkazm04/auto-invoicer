@@ -34,15 +34,14 @@ export function DraftsPanel({ onLoadDraft, onNewInvoice }: DraftsPanelProps) {
   const { theme: t } = useTheme();
   const isMono = t.id === "minimal-mono";
 
-  const [drafts, setDrafts] = useState<DraftSummary[]>(() =>
-    typeof window !== "undefined" ? listDrafts() : []
-  );
+  const [drafts, setDrafts] = useState<DraftSummary[]>([]);
 
   const refresh = useCallback(() => {
     setDrafts(listDrafts());
   }, []);
 
   useEffect(() => {
+    refresh();
     const handleStorage = (e: StorageEvent) => {
       if (e.key?.startsWith("invoice-drafts:")) refresh();
     };
@@ -66,19 +65,19 @@ export function DraftsPanel({ onLoadDraft, onNewInvoice }: DraftsPanelProps) {
         {t.useHandwritten ? (
           <span className={`font-[family-name:var(--font-caveat)] text-xl ${t.sectionLabel}`}>Drafts</span>
         ) : (
-          <span className={`text-[9px] uppercase tracking-widest ${t.labelColor}`}>Drafts</span>
+          <span className={`text-[13px] uppercase tracking-widest ${t.labelColor}`}>Drafts</span>
         )}
         <button
           type="button"
           onClick={onNewInvoice}
-          className={`${isMono ? "text-[10px]" : "text-[11px] font-semibold"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} uppercase tracking-wider transition-colors`}
+          className={`${isMono ? "text-xs" : "text-[13px] font-semibold"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} uppercase tracking-wider transition-colors`}
         >
           {isMono ? "+ New" : "+ New Invoice"}
         </button>
       </div>
 
       {drafts.length === 0 ? (
-        <p className={`${isMono ? "text-[10px]" : "text-sm"} ${t.labelColor}`}>
+        <p className={`${isMono ? "text-xs" : "text-sm"} ${t.labelColor}`}>
           No saved drafts yet.
         </p>
       ) : (
@@ -91,15 +90,15 @@ export function DraftsPanel({ onLoadDraft, onNewInvoice }: DraftsPanelProps) {
             >
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
-                  <div className={`${isMono ? "text-[11px] font-medium" : "text-sm font-medium"} ${t.inputText} truncate`}>
+                  <div className={`${isMono ? "text-[13px] font-medium" : "text-sm font-medium"} ${t.inputText} truncate`}>
                     #{draft.number}
                   </div>
-                  <div className={`${isMono ? "text-[9px]" : "text-xs"} ${t.labelColor} mt-0.5`}>
+                  <div className={`${isMono ? "text-[13px]" : "text-xs"} ${t.labelColor} mt-0.5`}>
                     {formatDate(draft.updatedAt)}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 ml-2">
-                  <span className={`${isMono ? "text-[10px]" : "text-xs font-medium"} ${t.summaryValueColor} tabular-nums whitespace-nowrap`}>
+                  <span className={`${isMono ? "text-xs" : "text-xs font-medium"} ${t.summaryValueColor} tabular-nums whitespace-nowrap`}>
                     {formatCurrency(draft.total, draft.currency)}
                   </span>
                   <button

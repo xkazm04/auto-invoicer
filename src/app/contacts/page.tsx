@@ -66,7 +66,7 @@ export default function ContactsPage() {
     setIsAdding(false);
   }, []);
 
-  const inputClass = `w-full ${isMono ? "text-[11px]" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} ${t.inputBg} ${t.inputRadius} ${t.inputPadding} focus:outline-none ${t.inputFocusBg} ${isMono ? "border-b border-neutral-100 focus:border-neutral-900" : ""} transition-colors`;
+  const inputClass = `w-full ${isMono ? "text-[13px]" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} ${t.inputBg} ${t.inputRadius} ${t.inputPadding} focus:outline-none ${t.inputFocusBg} ${isMono ? "border-b border-neutral-100 focus:border-neutral-900" : ""} transition-colors`;
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -74,12 +74,12 @@ export default function ContactsPage() {
         {t.useHandwritten ? (
           <span className={`font-[family-name:var(--font-caveat)] text-2xl ${t.sectionLabel}`}>Contacts</span>
         ) : (
-          <span className={`text-[9px] uppercase tracking-widest ${t.labelColor}`}>Contacts</span>
+          <span className={`text-[13px] uppercase tracking-widest ${t.labelColor}`}>Contacts</span>
         )}
         <button
           type="button"
           onClick={startAdd}
-          className={`${isMono ? "text-[10px]" : "text-[11px] font-semibold"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} uppercase tracking-wider transition-colors`}
+          className={`${isMono ? "text-xs" : "text-[13px] font-semibold"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} uppercase tracking-wider transition-colors`}
         >
           {isMono ? "+ new" : "+ New Contact"}
         </button>
@@ -88,7 +88,7 @@ export default function ContactsPage() {
       {/* Add / Edit form */}
       {(isAdding || editingId) && (
         <div className={`mb-6 ${isMono ? "border border-neutral-200 p-3" : "rounded-2xl p-5 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]"}`}>
-          <div className={`${isMono ? "text-[9px]" : "text-xs font-semibold"} ${t.labelColor} uppercase tracking-wider mb-3`}>
+          <div className={`${isMono ? "text-[13px]" : "text-xs font-semibold"} ${t.labelColor} uppercase tracking-wider mb-3`}>
             {editingId ? "Edit Contact" : "New Contact"}
           </div>
           <div className="space-y-3">
@@ -126,7 +126,7 @@ export default function ContactsPage() {
               <button
                 type="button"
                 onClick={handleCancel}
-                className={`${isMono ? "text-[10px] uppercase tracking-widest" : "px-4 py-2 text-xs font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} transition-colors`}
+                className={`${isMono ? "text-xs uppercase tracking-widest" : "px-4 py-2 text-xs font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} transition-colors`}
               >
                 Cancel
               </button>
@@ -134,7 +134,7 @@ export default function ContactsPage() {
                 type="button"
                 onClick={handleSave}
                 disabled={!draft.name.trim()}
-                className={`${isMono ? "text-[10px] uppercase tracking-widest border-b border-neutral-900 pb-0.5" : "px-4 py-2 text-xs"} ${t.primaryBtnBg} ${t.primaryBtnHoverBg} ${t.primaryBtnText} ${t.primaryBtnRadius} transition-all disabled:opacity-50`}
+                className={`${isMono ? "text-xs uppercase tracking-widest border-b border-neutral-900 pb-0.5" : "px-4 py-2 text-xs"} ${t.primaryBtnBg} ${t.primaryBtnHoverBg} ${t.primaryBtnText} ${t.primaryBtnRadius} transition-all disabled:opacity-50`}
               >
                 {editingId ? "Update" : "Save"}
               </button>
@@ -145,7 +145,7 @@ export default function ContactsPage() {
 
       {/* Contact list */}
       {contacts.length === 0 && !isAdding ? (
-        <p className={`${isMono ? "text-[11px]" : "text-sm"} ${t.labelColor}`}>
+        <p className={`${isMono ? "text-[13px]" : "text-sm"} ${t.labelColor}`}>
           No contacts yet. Add one to get started.
         </p>
       ) : (
@@ -161,14 +161,14 @@ export default function ContactsPage() {
                     {contact.name}
                   </div>
                   {(contact.taxId || contact.vatId) && (
-                    <div className={`${isMono ? "text-[9px]" : "text-xs"} ${t.labelColor} mt-0.5`}>
+                    <div className={`${isMono ? "text-[13px]" : "text-xs"} ${t.labelColor} mt-0.5`}>
                       {[contact.taxId && `Tax: ${contact.taxId}`, contact.vatId && `VAT: ${contact.vatId}`]
                         .filter(Boolean)
                         .join(" / ")}
                     </div>
                   )}
                   {contact.address && (
-                    <div className={`${isMono ? "text-[9px]" : "text-xs"} ${t.labelColor} mt-0.5`}>
+                    <div className={`${isMono ? "text-[13px]" : "text-xs"} ${t.labelColor} mt-0.5`}>
                       {contact.address}
                     </div>
                   )}
@@ -177,14 +177,14 @@ export default function ContactsPage() {
                   <button
                     type="button"
                     onClick={() => startEdit(contact)}
-                    className={`${isMono ? "text-[9px]" : "text-xs"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} transition-colors`}
+                    className={`${isMono ? "text-[13px]" : "text-xs"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} transition-colors`}
                   >
                     {isMono ? "edit" : "Edit"}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDelete(contact.id)}
-                    className={`${isMono ? "text-[9px]" : "text-xs"} text-neutral-400 hover:text-red-500 transition-colors`}
+                    className={`${isMono ? "text-[13px]" : "text-xs"} text-neutral-400 hover:text-red-500 transition-colors`}
                   >
                     {isMono ? "del" : "Delete"}
                   </button>
