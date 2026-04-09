@@ -88,7 +88,13 @@ The ranking criteria prioritize confidence (#1) over impact (#2). Follow-up item
 **Source:** business domain scan (EU Directive 2006/112/EC Article 226, ARES API, VIES API)
 **Confidence at selection:** medium
 **Quality score:** 100/100
-**User verdict:** pending
+**User verdict:** CRITIQUED (right goal, execution lacks strategic depth)
+**Reasoning:** Three specific gaps: (1) Lookup buttons have no styling — bare text with no visual affordance, doesn't communicate the feature's value. (2) ARES returns IČO, DIČ, legal form, registration court, file number — but we only capture name+address, which may not be legally sufficient. (3) Contacts page (/contacts) has no VAT lookup, even though that's the primary place users manage contacts. Meta-issue: the skill executes tasks mechanically without stepping back to ask "is this feature complete from a user's perspective?" — missing design-level thinking about data completeness, surface coverage, and UI quality.
+
+**What the skill should have done differently:**
+- Before implementing: research what ARES *actually returns* (not just that it exists) and map those fields to legal invoice requirements
+- Before coding the lookup: list every surface where a user enters a VAT ID and plan to wire lookup into ALL of them
+- Before committing UI: ask "does this button's visual treatment match its importance as a feature?"
 
 **Business Domain Scan findings:**
 - EU invoices require: sequential numbering, payment details (IBAN), VAT breakdown, seller/buyer IDs
