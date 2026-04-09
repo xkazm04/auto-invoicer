@@ -7,6 +7,8 @@ import { computeInvoiceTotals, nextStatus } from "@/types/invoice";
 import { createSampleInvoice, createEmptyLineItem } from "@/lib/invoice/sample";
 import { downloadInvoicePDF } from "@/lib/pdf/download";
 import { validateInvoice, type ValidationErrors } from "@/lib/invoice/validation";
+import { ContactPicker } from "./ContactPicker";
+import { saveContact } from "@/lib/contacts/store";
 
 type PartyKey = "supplier" | "customer";
 
@@ -117,6 +119,23 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
   const cycleStatus = useCallback(() => {
     setInvoice((prev) => ({ ...prev, status: nextStatus(prev.status) }));
   }, []);
+
+  const fillParty = useCallback((which: PartyKey, party: Party) => {
+    setInvoice((prev) => {
+      const next = { ...prev, [which]: party };
+      if (hasAttemptedCreate) revalidate(next);
+      return next;
+    });
+  }, [hasAttemptedCreate, revalidate]);
+
+  const [savedFlash, setSavedFlash] = useState<PartyKey | null>(null);
+  const handleSaveContact = useCallback((which: PartyKey) => {
+    const party = invoice[which];
+    if (!party.name.trim()) return;
+    saveContact(party);
+    setSavedFlash(which);
+    setTimeout(() => setSavedFlash(null), 1500);
+  }, [invoice]);
 
   const dateFields: Array<{
     label: string;
@@ -231,6 +250,14 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
               ) : (
                 <span className={`text-[9px] uppercase tracking-widest ${t.labelColor}`}>Supplier</span>
               )}
+              <div className="ml-auto flex items-center gap-2">
+                <ContactPicker onSelect={(p) => fillParty("supplier", p)} />
+                {invoice.supplier.name.trim() && (
+                  <button type="button" onClick={() => handleSaveContact("supplier")} className={`${isMono ? "text-[9px]" : "text-[10px] font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} transition-colors`}>
+                    {savedFlash === "supplier" ? (isMono ? "ok" : "Saved!") : (isMono ? "save" : "Save")}
+                  </button>
+                )}
+              </div>
             </div>
             <div className={`space-y-${isMono ? "1" : "4"}`}>
               <input
@@ -291,6 +318,14 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
               ) : (
                 <span className={`text-[9px] uppercase tracking-widest ${t.labelColor}`}>Customer</span>
               )}
+              <div className="ml-auto flex items-center gap-2">
+                <ContactPicker onSelect={(p) => fillParty("customer", p)} />
+                {invoice.customer.name.trim() && (
+                  <button type="button" onClick={() => handleSaveContact("customer")} className={`${isMono ? "text-[9px]" : "text-[10px] font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} transition-colors`}>
+                    {savedFlash === "customer" ? (isMono ? "ok" : "Saved!") : (isMono ? "save" : "Save")}
+                  </button>
+                )}
+              </div>
             </div>
             <div className={`space-y-${isMono ? "1" : "4"}`}>
               <input
