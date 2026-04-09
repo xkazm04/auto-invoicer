@@ -16,7 +16,16 @@ export interface LineItem {
   unitPrice: number;
 }
 
+export const STATUS_ORDER: InvoiceStatus[] = ["draft", "sent", "paid", "overdue"];
+
+export function nextStatus(current: InvoiceStatus): InvoiceStatus {
+  const idx = STATUS_ORDER.indexOf(current);
+  if (idx < 0 || idx >= STATUS_ORDER.length - 1) return current;
+  return STATUS_ORDER[idx + 1];
+}
+
 export interface Invoice {
+  id: string;
   number: string;
   status: InvoiceStatus;
   issueDate: string;

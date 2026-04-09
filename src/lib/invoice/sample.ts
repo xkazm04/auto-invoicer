@@ -2,6 +2,9 @@ import type { Invoice } from "@/types/invoice";
 
 export function createSampleInvoice(): Invoice {
   return {
+    id: typeof crypto !== "undefined" && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `inv-${Date.now()}`,
     number: "2024-0042",
     status: "draft",
     issueDate: "2024-12-02",

@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useTheme } from "./ThemeContext";
 import type { Currency, Invoice, LineItem, Party } from "@/types/invoice";
-import { computeInvoiceTotals } from "@/types/invoice";
+import { computeInvoiceTotals, nextStatus } from "@/types/invoice";
 import { createSampleInvoice, createEmptyLineItem } from "@/lib/invoice/sample";
 import { downloadInvoicePDF } from "@/lib/pdf/download";
 
@@ -77,6 +77,17 @@ export function InvoiceForm() {
     }));
   }, []);
 
+  const removeLineItem = useCallback((id: string) => {
+    setInvoice((prev) => {
+      if (prev.lineItems.length <= 1) return prev;
+      return { ...prev, lineItems: prev.lineItems.filter((item) => item.id !== id) };
+    });
+  }, []);
+
+  const cycleStatus = useCallback(() => {
+    setInvoice((prev) => ({ ...prev, status: nextStatus(prev.status) }));
+  }, []);
+
   const dateFields: Array<{
     label: string;
     shortLabel: string;
@@ -102,17 +113,28 @@ export function InvoiceForm() {
                 Invoice
               </span>
             )}
-            <h1 className={`${isMono ? "text-sm font-medium" : "text-5xl font-extralight"} ${t.headerNumber} tracking-tight ${t.id === "paper-perfect" ? "mt-1" : ""}`}>
-              {isMono ? "#" : ""}{invoice.number}
-            </h1>
+            <div className={`flex items-baseline gap-0 ${t.id === "paper-perfect" ? "mt-1" : ""}`}>
+              {isMono && <span className={`text-sm font-medium ${t.headerNumber}`}>#</span>}
+              <input
+                type="text"
+                value={invoice.number}
+                onChange={(e) => updateField("number", e.target.value)}
+                className={`${isMono ? "text-sm font-medium w-24" : "text-5xl font-extralight w-64"} ${t.headerNumber} tracking-tight bg-transparent focus:outline-none`}
+              />
+            </div>
           </div>
           <div className={t.id === "paper-perfect" ? "pb-1" : ""}>
-            <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={cycleStatus}
+              className="flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity"
+              title="Click to advance status"
+            >
               <div className={`w-2 h-2 rounded-full ${t.statusDot} ${t.statusDotGlow}`} />
               <span className={`${isMono ? "text-[10px]" : "text-sm font-medium"} ${t.statusText}`}>
                 {statusLabel(invoice.status)}
               </span>
-            </div>
+            </button>
           </div>
         </div>
       </div>
@@ -351,9 +373,20 @@ export function InvoiceForm() {
                       onChange={(e) => updateLineItem(item.id, "unitPrice", Number(e.target.value) || 0)}
                       className={`col-span-2 ${isMono ? "text-[11px] text-neutral-600" : "text-[15px]"} ${t.id === "paper-perfect" ? t.inputText : ""} text-right bg-transparent focus:outline-none`}
                     />
-                    <div className={`col-span-${isMono ? "2" : "3"} ${isMono ? "text-[11px]" : "text-[15px] font-semibold"} ${t.inputText} text-right tabular-nums`}>
+                    <div className={`${isMono ? "col-span-1" : "col-span-2"} ${isMono ? "text-[11px]" : "text-[15px] font-semibold"} ${t.inputText} text-right tabular-nums`}>
                       {formatAmount(lineAmount, isMono, false)}
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => removeLineItem(item.id)}
+                      disabled={invoice.lineItems.length <= 1}
+                      className="col-span-1 text-center text-neutral-400 hover:text-red-500 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                      title="Remove item"
+                    >
+                      <svg className={`${isMono ? "w-3 h-3" : "w-4 h-4"} inline`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
                   </div>
                   {t.id === "paper-perfect" && i < arr.length - 1 && (
                     <div className="mx-5 h-px bg-gradient-to-r from-transparent via-[#E8E4DF] to-transparent" />
