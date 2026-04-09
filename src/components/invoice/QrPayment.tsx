@@ -16,25 +16,29 @@ export const QrPayment = memo(function QrPayment({ invoice }: QrPaymentProps) {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!canGenerateQr(invoice)) {
-      setDataUrl(null);
-      return;
+    let cancelled = false;
+
+    async function generate() {
+      if (!canGenerateQr(invoice)) return null;
+      const spd = generateSpdString(invoice);
+      if (!spd) return null;
+      try {
+        return await QRCode.toDataURL(spd, {
+          width: 160,
+          margin: 1,
+          color: { dark: "#000000", light: "#ffffff" },
+          errorCorrectionLevel: "M",
+        });
+      } catch {
+        return null;
+      }
     }
 
-    const spd = generateSpdString(invoice);
-    if (!spd) {
-      setDataUrl(null);
-      return;
-    }
+    generate().then((url) => {
+      if (!cancelled) setDataUrl(url);
+    });
 
-    QRCode.toDataURL(spd, {
-      width: 160,
-      margin: 1,
-      color: { dark: "#000000", light: "#ffffff" },
-      errorCorrectionLevel: "M",
-    })
-      .then(setDataUrl)
-      .catch(() => setDataUrl(null));
+    return () => { cancelled = true; };
   }, [invoice]);
 
   if (!canGenerateQr(invoice) || !dataUrl) return null;
