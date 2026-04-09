@@ -9,6 +9,7 @@ import { downloadInvoicePDF } from "@/lib/pdf/download";
 import { validateInvoice, type ValidationErrors } from "@/lib/invoice/validation";
 import { ContactPicker } from "./ContactPicker";
 import { saveContact } from "@/lib/contacts/store";
+import { lookupVat } from "@/lib/vat/lookup";
 
 type PartyKey = "supplier" | "customer";
 
@@ -137,6 +138,29 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
     },
     []
   );
+
+  const [lookingUp, setLookingUp] = useState<PartyKey | null>(null);
+
+  const handleVatLookup = useCallback(async (which: PartyKey) => {
+    const party = invoice[which];
+    const vatId = party.vatId || party.taxId;
+    if (!vatId.trim()) return;
+    setLookingUp(which);
+    try {
+      const result = await lookupVat(vatId.trim(), invoice.currency === "CZK" ? "CZ" : "EU");
+      if (result.valid && result.name) {
+        fillParty(which, {
+          ...party,
+          name: result.name || party.name,
+          address: result.address || party.address,
+        });
+      }
+    } catch {
+      // silently fail — button just does nothing visible
+    } finally {
+      setLookingUp(null);
+    }
+  }, [invoice, fillParty]);
 
   const [savedFlash, setSavedFlash] = useState<PartyKey | null>(null);
   const handleSaveContact = useCallback((which: PartyKey) => {
@@ -290,7 +314,12 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
                   />
                 </div>
                 <div>
-                  <label className={`text-[13px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>VAT ID</label>
+                  <div className="flex items-center gap-1 mb-1.5">
+                    <label className={`text-[13px] font-semibold ${t.labelColor} uppercase tracking-wider`}>VAT ID</label>
+                    <button type="button" onClick={() => handleVatLookup("supplier")} disabled={lookingUp === "supplier"} className={`${isMono ? "text-[11px]" : "text-[11px] font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} transition-colors disabled:opacity-50`}>
+                      {lookingUp === "supplier" ? "..." : isMono ? "[lookup]" : "Lookup"}
+                    </button>
+                  </div>
                   <input
                     type="text"
                     placeholder="CZ000000000"
@@ -358,7 +387,12 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
                   />
                 </div>
                 <div>
-                  <label className={`text-[13px] font-semibold ${t.labelColor} uppercase tracking-wider block mb-1.5`}>VAT ID</label>
+                  <div className="flex items-center gap-1 mb-1.5">
+                    <label className={`text-[13px] font-semibold ${t.labelColor} uppercase tracking-wider`}>VAT ID</label>
+                    <button type="button" onClick={() => handleVatLookup("customer")} disabled={lookingUp === "customer"} className={`${isMono ? "text-[11px]" : "text-[11px] font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} transition-colors disabled:opacity-50`}>
+                      {lookingUp === "customer" ? "..." : isMono ? "[lookup]" : "Lookup"}
+                    </button>
+                  </div>
                   <input
                     type="text"
                     placeholder="CZ000000000"
