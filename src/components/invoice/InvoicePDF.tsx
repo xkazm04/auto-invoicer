@@ -7,221 +7,216 @@ import {
 } from "@react-pdf/renderer";
 import type { Invoice } from "@/types/invoice";
 import { computeInvoiceTotals, computeLineItemAmount } from "@/types/invoice";
+import type { ThemeId } from "./theme";
+import { getPdfTheme, type PdfTheme } from "@/lib/pdf/pdfTheme";
 
-const COLORS = {
-  text: "#1a1a1a",
-  textMuted: "#6b6b6b",
-  textFaint: "#9a9a9a",
-  border: "#e5e5e5",
-  borderStrong: "#1a1a1a",
-  background: "#ffffff",
-  panel: "#fafaf8",
-};
-
-const styles = StyleSheet.create({
-  page: {
-    paddingTop: 48,
-    paddingBottom: 48,
-    paddingHorizontal: 48,
-    fontSize: 10,
-    color: COLORS.text,
-    backgroundColor: COLORS.background,
-    fontFamily: "Helvetica",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-end",
-    marginBottom: 32,
-    paddingBottom: 16,
-    borderBottom: `1pt solid ${COLORS.border}`,
-  },
-  headerLabel: {
-    fontSize: 8,
-    letterSpacing: 1.5,
-    textTransform: "uppercase",
-    color: COLORS.textMuted,
-    marginBottom: 4,
-  },
-  headerNumber: {
-    fontSize: 24,
-    fontWeight: "light",
-    color: COLORS.text,
-  },
-  status: {
-    fontSize: 9,
-    color: COLORS.textMuted,
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  datesRow: {
-    flexDirection: "row",
-    marginBottom: 28,
-  },
-  dateCell: {
-    flex: 1,
-    paddingRight: 12,
-  },
-  dateLabel: {
-    fontSize: 7,
-    color: COLORS.textMuted,
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    marginBottom: 4,
-  },
-  dateValue: {
-    fontSize: 11,
-    color: COLORS.text,
-  },
-  partiesRow: {
-    flexDirection: "row",
-    marginBottom: 28,
-  },
-  partyCard: {
-    flex: 1,
-    padding: 14,
-    backgroundColor: COLORS.panel,
-    borderRadius: 4,
-  },
-  partyCardSpacer: {
-    width: 12,
-  },
-  partyHeader: {
-    fontSize: 7,
-    color: COLORS.textMuted,
-    textTransform: "uppercase",
-    letterSpacing: 1.5,
-    marginBottom: 8,
-  },
-  partyName: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: COLORS.text,
-    marginBottom: 6,
-  },
-  partyDetailRow: {
-    flexDirection: "row",
-    marginBottom: 4,
-  },
-  partyDetailLabel: {
-    fontSize: 7,
-    color: COLORS.textFaint,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-    width: 40,
-  },
-  partyDetailValue: {
-    fontSize: 9,
-    color: COLORS.text,
-    flex: 1,
-  },
-  partyAddress: {
-    fontSize: 9,
-    color: COLORS.text,
-    marginTop: 6,
-    lineHeight: 1.4,
-  },
-  itemsHeader: {
-    fontSize: 7,
-    color: COLORS.textMuted,
-    textTransform: "uppercase",
-    letterSpacing: 1.5,
-    marginBottom: 8,
-  },
-  table: {
-    borderTop: `1pt solid ${COLORS.borderStrong}`,
-    borderBottom: `1pt solid ${COLORS.border}`,
-    marginBottom: 24,
-  },
-  tableHeaderRow: {
-    flexDirection: "row",
-    paddingVertical: 8,
-    borderBottom: `0.5pt solid ${COLORS.border}`,
-  },
-  tableRow: {
-    flexDirection: "row",
-    paddingVertical: 8,
-    borderBottom: `0.5pt solid ${COLORS.border}`,
-  },
-  tableRowLast: {
-    flexDirection: "row",
-    paddingVertical: 8,
-  },
-  colDescription: {
-    flex: 5,
-    fontSize: 10,
-  },
-  colQty: {
-    flex: 1.5,
-    fontSize: 10,
-    textAlign: "center",
-  },
-  colPrice: {
-    flex: 2,
-    fontSize: 10,
-    textAlign: "right",
-  },
-  colAmount: {
-    flex: 2,
-    fontSize: 10,
-    textAlign: "right",
-    fontWeight: "bold",
-  },
-  thText: {
-    fontSize: 7,
-    color: COLORS.textMuted,
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    fontWeight: "bold",
-  },
-  totalsWrap: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-  },
-  totalsBox: {
-    width: 220,
-  },
-  totalsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 4,
-  },
-  totalsLabel: {
-    fontSize: 9,
-    color: COLORS.textMuted,
-  },
-  totalsValue: {
-    fontSize: 9,
-    color: COLORS.text,
-  },
-  totalsDivider: {
-    height: 1,
-    backgroundColor: COLORS.border,
-    marginVertical: 6,
-  },
-  grandTotalRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "baseline",
-    paddingTop: 4,
-  },
-  grandTotalLabel: {
-    fontSize: 10,
-    color: COLORS.textMuted,
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  grandTotalValue: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: COLORS.text,
-  },
-  grandTotalCurrency: {
-    fontSize: 10,
-    color: COLORS.textMuted,
-    marginLeft: 4,
-  },
-});
+function buildStyles(t: PdfTheme) {
+  const c = t.colors;
+  return StyleSheet.create({
+    page: {
+      paddingTop: 48,
+      paddingBottom: 48,
+      paddingHorizontal: 48,
+      fontSize: 10,
+      color: c.text,
+      backgroundColor: c.background,
+      fontFamily: t.fontFamily,
+    },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-end",
+      marginBottom: 32,
+      paddingBottom: 16,
+      borderBottom: `1pt solid ${c.border}`,
+    },
+    headerLabel: {
+      fontSize: 8,
+      letterSpacing: 1.5,
+      textTransform: "uppercase",
+      color: c.textMuted,
+      marginBottom: 4,
+    },
+    headerNumber: {
+      fontSize: 24,
+      fontWeight: "light",
+      color: c.text,
+    },
+    status: {
+      fontSize: 9,
+      color: c.textMuted,
+      textTransform: "uppercase",
+      letterSpacing: 1,
+    },
+    datesRow: {
+      flexDirection: "row",
+      marginBottom: 28,
+    },
+    dateCell: {
+      flex: 1,
+      paddingRight: 12,
+    },
+    dateLabel: {
+      fontSize: 7,
+      color: c.textMuted,
+      textTransform: "uppercase",
+      letterSpacing: 1,
+      marginBottom: 4,
+    },
+    dateValue: {
+      fontSize: 11,
+      color: c.text,
+    },
+    partiesRow: {
+      flexDirection: "row",
+      marginBottom: 28,
+    },
+    partyCard: {
+      flex: 1,
+      padding: t.panelPadding,
+      backgroundColor: c.panel,
+      borderRadius: t.borderRadius,
+    },
+    partyCardSpacer: {
+      width: 12,
+    },
+    partyHeader: {
+      fontSize: 7,
+      color: c.textMuted,
+      textTransform: "uppercase",
+      letterSpacing: 1.5,
+      marginBottom: 8,
+    },
+    partyName: {
+      fontSize: 12,
+      fontWeight: "bold",
+      color: c.text,
+      marginBottom: 6,
+    },
+    partyDetailRow: {
+      flexDirection: "row",
+      marginBottom: 4,
+    },
+    partyDetailLabel: {
+      fontSize: 7,
+      color: c.textFaint,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+      width: 40,
+    },
+    partyDetailValue: {
+      fontSize: 9,
+      color: c.text,
+      flex: 1,
+    },
+    partyAddress: {
+      fontSize: 9,
+      color: c.text,
+      marginTop: 6,
+      lineHeight: 1.4,
+    },
+    itemsHeader: {
+      fontSize: 7,
+      color: c.textMuted,
+      textTransform: "uppercase",
+      letterSpacing: 1.5,
+      marginBottom: 8,
+    },
+    table: {
+      borderTop: `1pt solid ${c.borderStrong}`,
+      borderBottom: `1pt solid ${c.border}`,
+      marginBottom: 24,
+    },
+    tableHeaderRow: {
+      flexDirection: "row",
+      paddingVertical: 8,
+      borderBottom: `0.5pt solid ${c.border}`,
+    },
+    tableRow: {
+      flexDirection: "row",
+      paddingVertical: 8,
+      borderBottom: `0.5pt solid ${c.border}`,
+    },
+    tableRowLast: {
+      flexDirection: "row",
+      paddingVertical: 8,
+    },
+    colDescription: {
+      flex: 5,
+      fontSize: 10,
+    },
+    colQty: {
+      flex: 1.5,
+      fontSize: 10,
+      textAlign: "center",
+    },
+    colPrice: {
+      flex: 2,
+      fontSize: 10,
+      textAlign: "right",
+    },
+    colAmount: {
+      flex: 2,
+      fontSize: 10,
+      textAlign: "right",
+      fontWeight: "bold",
+    },
+    thText: {
+      fontSize: 7,
+      color: c.textMuted,
+      textTransform: "uppercase",
+      letterSpacing: 1,
+      fontWeight: "bold",
+    },
+    totalsWrap: {
+      flexDirection: "row",
+      justifyContent: "flex-end",
+    },
+    totalsBox: {
+      width: 220,
+    },
+    totalsRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      paddingVertical: 4,
+    },
+    totalsLabel: {
+      fontSize: 9,
+      color: c.textMuted,
+    },
+    totalsValue: {
+      fontSize: 9,
+      color: c.text,
+    },
+    totalsDivider: {
+      height: 1,
+      backgroundColor: c.border,
+      marginVertical: 6,
+    },
+    grandTotalRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "baseline",
+      paddingTop: 4,
+    },
+    grandTotalLabel: {
+      fontSize: 10,
+      color: c.textMuted,
+      textTransform: "uppercase",
+      letterSpacing: 1,
+    },
+    grandTotalValue: {
+      fontSize: 18,
+      fontWeight: "bold",
+      color: c.text,
+    },
+    grandTotalCurrency: {
+      fontSize: 10,
+      color: c.textMuted,
+      marginLeft: 4,
+    },
+  });
+}
 
 function formatMoney(value: number): string {
   return value.toLocaleString("en-US", {
@@ -237,11 +232,14 @@ function formatTotal(value: number): string {
   });
 }
 
-interface InvoicePDFProps {
+export interface InvoicePDFProps {
   invoice: Invoice;
+  themeId?: ThemeId;
 }
 
-export function InvoicePDF({ invoice }: InvoicePDFProps) {
+export function InvoicePDF({ invoice, themeId = "paper-perfect" }: InvoicePDFProps) {
+  const pdfTheme = getPdfTheme(themeId);
+  const styles = buildStyles(pdfTheme);
   const totals = computeInvoiceTotals(invoice);
   const items = invoice.lineItems;
 
