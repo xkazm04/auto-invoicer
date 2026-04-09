@@ -43,6 +43,7 @@ function makeInvoice(lineItems: LineItem[], vatRate = 0.21): Invoice {
     customer: { name: "C", taxId: "", vatId: "", address: "" },
     lineItems,
     vatRate,
+    paymentDetails: { iban: "", swift: "", bankName: "", reference: "" },
   };
 }
 

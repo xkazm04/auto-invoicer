@@ -15,6 +15,7 @@ function makeInvoice(overrides: Partial<Invoice> = {}): Invoice {
     customer: { name: "Customer", taxId: "", vatId: "", address: "" },
     lineItems: [{ id: "li-1", description: "Work", quantity: 10, unitPrice: 100 }],
     vatRate: 0.21,
+    paymentDetails: { iban: "", swift: "", bankName: "", reference: "" },
     ...overrides,
   };
 }

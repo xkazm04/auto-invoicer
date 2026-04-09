@@ -17,6 +17,7 @@ function validInvoice(): Invoice {
       { id: "li-1", description: "Service", quantity: 5, unitPrice: 200 },
     ],
     vatRate: 0.21,
+    paymentDetails: { iban: "", swift: "", bankName: "", reference: "" },
   };
 }
 

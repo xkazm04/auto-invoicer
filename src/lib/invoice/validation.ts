@@ -15,6 +15,13 @@ const lineItemSchema = z.object({
   unitPrice: z.number().gt(0, "Price must be greater than 0"),
 });
 
+const paymentDetailsSchema = z.object({
+  iban: z.string(),
+  swift: z.string(),
+  bankName: z.string(),
+  reference: z.string(),
+});
+
 export const invoiceSchema = z.object({
   id: z.string().min(1),
   number: z.string().min(1, "Invoice number is required"),
@@ -27,6 +34,7 @@ export const invoiceSchema = z.object({
   customer: partySchema,
   lineItems: z.array(lineItemSchema).min(1, "At least one line item is required"),
   vatRate: z.number().min(0).max(1),
+  paymentDetails: paymentDetailsSchema,
 });
 
 export interface ValidationErrors {

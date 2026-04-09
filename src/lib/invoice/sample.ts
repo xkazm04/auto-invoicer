@@ -38,6 +38,12 @@ export function createSampleInvoice(): Invoice {
       },
     ],
     vatRate: 0.21,
+    paymentDetails: {
+      iban: "",
+      swift: "",
+      bankName: "",
+      reference: "",
+    },
   };
 }
 

@@ -24,6 +24,13 @@ export function nextStatus(current: InvoiceStatus): InvoiceStatus {
   return STATUS_ORDER[idx + 1];
 }
 
+export interface PaymentDetails {
+  iban: string;
+  swift: string;
+  bankName: string;
+  reference: string;
+}
+
 export interface Invoice {
   id: string;
   number: string;
@@ -36,6 +43,7 @@ export interface Invoice {
   customer: Party;
   lineItems: LineItem[];
   vatRate: number;
+  paymentDetails: PaymentDetails;
 }
 
 export function computeLineItemAmount(item: LineItem): number {
