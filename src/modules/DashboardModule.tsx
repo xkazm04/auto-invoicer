@@ -6,6 +6,8 @@ import { listArchived, type ArchivedInvoiceSummary } from "@/lib/invoice/archive
 import { listDrafts, type DraftSummary } from "@/lib/invoice/drafts";
 import { formatMoney } from "@/lib/currency/format";
 import type { Currency, InvoiceStatus } from "@/types/invoice";
+import { FadeIn } from "@/components/ui/FadeIn";
+import { StaggeredList } from "@/components/ui/StaggeredList";
 
 type FilterStatus = "all" | InvoiceStatus;
 
@@ -154,18 +156,21 @@ export default function DashboardModule({ onNavigate }: DashboardModuleProps) {
       </div>
 
       <div className={`grid grid-cols-4 ${isMono ? "gap-px bg-neutral-200 mb-8" : "gap-4 mb-8"}`}>
-        {kpiCards.map((card) => (
-          <div key={card.label} className={`${t.cardBg} ${t.cardRadius} ${isMono ? "p-3" : "p-5"} ${t.cardShadow}`}>
-            <div className={`${isMono ? "text-[9px]" : "text-[10px]"} font-semibold ${t.labelColor} uppercase tracking-wider mb-2`}>
-              {isMono ? card.monoLabel : card.label}
+        <StaggeredList staggerMs={80} baseDelay={50}>
+          {kpiCards.map((card) => (
+            <div key={card.label} className={`${t.cardBg} ${t.cardRadius} ${isMono ? "p-3" : "p-5"} ${t.cardShadow}`}>
+              <div className={`${isMono ? "text-[9px]" : "text-[10px]"} font-semibold ${t.labelColor} uppercase tracking-wider mb-2`}>
+                {isMono ? card.monoLabel : card.label}
+              </div>
+              <div className={`${isMono ? "text-sm font-medium" : "text-2xl font-light"} ${card.accent} tabular-nums`}>
+                {card.value}
+              </div>
             </div>
-            <div className={`${isMono ? "text-sm font-medium" : "text-2xl font-light"} ${card.accent} tabular-nums`}>
-              {card.value}
-            </div>
-          </div>
-        ))}
+          ))}
+        </StaggeredList>
       </div>
 
+      <FadeIn delay={300}>
       <div className={`flex gap-1 mb-6 ${isMono ? "border-b border-neutral-200 pb-2" : ""}`}>
         {filters.map((f) => (
           <button
@@ -181,7 +186,9 @@ export default function DashboardModule({ onNavigate }: DashboardModuleProps) {
           </button>
         ))}
       </div>
+      </FadeIn>
 
+      <FadeIn delay={400}>
       {filtered.length === 0 ? (
         <div className={`text-center py-12 ${t.labelColor}`}>
           <p className={`${isMono ? "text-xs" : "text-sm"}`}>
@@ -222,6 +229,7 @@ export default function DashboardModule({ onNavigate }: DashboardModuleProps) {
           })}
         </div>
       )}
+      </FadeIn>
     </div>
   );
 }

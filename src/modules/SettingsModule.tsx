@@ -10,6 +10,7 @@ import type { RecurringTemplate } from "@/types/recurring";
 import type { Currency, Party, PaymentDetails } from "@/types/invoice";
 import { formatMoney } from "@/lib/currency/format";
 import { PartySection } from "@/components/invoice/PartySection";
+import { FadeIn } from "@/components/ui/FadeIn";
 
 export default function SettingsModule() {
   const { theme: t } = useTheme();
@@ -80,6 +81,7 @@ export default function SettingsModule() {
         </div>
       </div>
 
+      <FadeIn delay={50}>
       <div className="mb-8">
         <div className={`${isMono ? "text-[13px] uppercase tracking-widest mb-3" : "text-xs font-semibold uppercase tracking-wider mb-4"} ${t.labelColor}`}>
           {isMono ? "company profile" : "Company Profile"}
@@ -100,7 +102,9 @@ export default function SettingsModule() {
           countryHint={settings.defaultCurrency === "CZK" ? "CZ" : "EU"}
         />
       </div>
+      </FadeIn>
 
+      <FadeIn delay={150}>
       <div className="mb-8">
         <div className={`${isMono ? "text-[13px] uppercase tracking-widest mb-3" : "text-xs font-semibold uppercase tracking-wider mb-4"} ${t.labelColor}`}>
           {isMono ? "payment defaults" : "Default Payment Details"}
@@ -126,7 +130,9 @@ export default function SettingsModule() {
           </div>
         </div>
       </div>
+      </FadeIn>
 
+      <FadeIn delay={250}>
       <div className="mb-8">
         <div className={`${isMono ? "text-[13px] uppercase tracking-widest mb-3" : "text-xs font-semibold uppercase tracking-wider mb-4"} ${t.labelColor}`}>
           {isMono ? "invoice defaults" : "Invoice Defaults"}
@@ -155,7 +161,9 @@ export default function SettingsModule() {
           </div>
         </div>
       </div>
+      </FadeIn>
 
+      <FadeIn delay={350}>
       <div className="mb-8">
         <div className={`${isMono ? "text-[13px] uppercase tracking-widest mb-3" : "text-xs font-semibold uppercase tracking-wider mb-4"} ${t.labelColor}`}>
           {isMono ? "recurring templates" : "Recurring Templates"}
@@ -188,6 +196,7 @@ export default function SettingsModule() {
           </div>
         )}
       </div>
+      </FadeIn>
     </div>
   );
 }

@@ -12,6 +12,8 @@ import {
 } from "@/lib/contacts/store";
 import { PartySection } from "@/components/invoice/PartySection";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { FadeIn } from "@/components/ui/FadeIn";
+import { StaggeredList } from "@/components/ui/StaggeredList";
 
 const EMPTY_PARTY: Party = { name: "", taxId: "", vatId: "", address: "", registrationId: "" };
 
@@ -131,6 +133,7 @@ export default function ContactsModule() {
         </p>
       ) : (
         <div className={`space-y-${isMono ? "1" : "2"}`}>
+          <StaggeredList staggerMs={50} baseDelay={100}>
           {contacts.map((contact) => (
             <div key={contact.id} className={`group ${t.cardBg} ${t.cardRadius} ${isMono ? "py-2 px-3" : "p-4"} ${t.cardShadow} ${t.cardHoverShadow} transition-shadow`}>
               <div className="flex items-start justify-between">
@@ -156,6 +159,7 @@ export default function ContactsModule() {
               </div>
             </div>
           ))}
+          </StaggeredList>
         </div>
       )}
     </div>
