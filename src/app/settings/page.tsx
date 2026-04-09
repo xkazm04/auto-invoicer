@@ -5,7 +5,10 @@ import { useTheme } from "@/components/invoice/ThemeContext";
 import type { AppSettings } from "@/types/settings";
 import { createDefaultSettings } from "@/types/settings";
 import { loadSettings, saveSettings } from "@/lib/settings/store";
+import { listTemplates, deleteTemplate } from "@/lib/recurring/store";
+import type { RecurringTemplate } from "@/types/recurring";
 import type { Currency, Party, PaymentDetails } from "@/types/invoice";
+import { formatMoney } from "@/lib/currency/format";
 import { PartySection } from "@/components/invoice/PartySection";
 
 export default function SettingsPage() {
@@ -16,6 +19,16 @@ export default function SettingsPage() {
     typeof window !== "undefined" ? loadSettings() : createDefaultSettings()
   );
   const [saved, setSaved] = useState(false);
+  const [templates, setTemplates] = useState<RecurringTemplate[]>(() =>
+    typeof window !== "undefined" ? listTemplates() : []
+  );
+
+  const refreshTemplates = useCallback(() => setTemplates(listTemplates()), []);
+
+  const handleDeleteTemplate = useCallback((id: string) => {
+    deleteTemplate(id);
+    refreshTemplates();
+  }, [refreshTemplates]);
 
   const handleSave = useCallback(() => {
     saveSettings(settings);
@@ -200,6 +213,55 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Recurring Templates */}
+      <div className="mb-8">
+        <div className={`${isMono ? "text-[13px] uppercase tracking-widest mb-3" : "text-xs font-semibold uppercase tracking-wider mb-4"} ${t.labelColor}`}>
+          {isMono ? "recurring templates" : "Recurring Templates"}
+        </div>
+        <p className={`${isMono ? "text-xs" : "text-xs"} ${t.labelColor} mb-4`}>
+          Templates are created from the invoice form using &quot;Save Template&quot;. Use them to quickly create recurring invoices.
+        </p>
+
+        {templates.length === 0 ? (
+          <p className={`${isMono ? "text-xs" : "text-sm"} ${t.labelColor}`}>
+            No templates yet. Create one from the invoice form.
+          </p>
+        ) : (
+          <div className={`space-y-${isMono ? "1" : "2"}`}>
+            {templates.map((tpl) => (
+              <div
+                key={tpl.id}
+                className={`group ${t.cardBg} ${t.cardRadius} ${isMono ? "py-2 px-3" : "p-4"} ${t.cardShadow} ${t.cardHoverShadow} transition-shadow`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="min-w-0 flex-1">
+                    <div className={`${isMono ? "text-xs font-medium" : "text-sm font-semibold"} ${t.inputText}`}>
+                      {tpl.name}
+                    </div>
+                    <div className={`${isMono ? "text-[13px]" : "text-xs"} ${t.labelColor} mt-0.5`}>
+                      {tpl.interval} &middot; {tpl.contactName || "No contact"} &middot;{" "}
+                      {tpl.lineItems.length} item{tpl.lineItems.length !== 1 ? "s" : ""} &middot;{" "}
+                      {formatMoney(
+                        tpl.lineItems.reduce((sum, li) => sum + li.quantity * li.unitPrice, 0) * (1 + tpl.vatRate),
+                        tpl.currency,
+                        { decimals: false }
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteTemplate(tpl.id)}
+                    className={`opacity-0 group-hover:opacity-100 ${isMono ? "text-[13px]" : "text-xs"} text-neutral-400 hover:text-red-500 transition-all`}
+                  >
+                    {isMono ? "del" : "Delete"}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

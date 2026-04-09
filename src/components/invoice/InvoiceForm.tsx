@@ -10,6 +10,8 @@ import { validateInvoice, type ValidationErrors } from "@/lib/invoice/validation
 import { formatMoney } from "@/lib/currency/format";
 import { archiveInvoice } from "@/lib/invoice/archive";
 import { deleteDraft } from "@/lib/invoice/drafts";
+import { saveTemplate } from "@/lib/recurring/store";
+import type { RecurringInterval } from "@/types/recurring";
 import { PartySection } from "./PartySection";
 
 function statusLabel(status: Invoice["status"]): string {
@@ -38,6 +40,10 @@ export function InvoiceForm({ initialInvoice, onSave, onCreated }: InvoiceFormPr
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [hasAttemptedCreate, setHasAttemptedCreate] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showTemplateSaved, setShowTemplateSaved] = useState(false);
+  const [showTemplateForm, setShowTemplateForm] = useState(false);
+  const [templateName, setTemplateName] = useState("");
+  const [templateInterval, setTemplateInterval] = useState<RecurringInterval>("monthly");
   const totals = computeInvoiceTotals(invoice);
 
   const revalidate = useCallback((inv: Invoice) => {
@@ -120,6 +126,30 @@ export function InvoiceForm({ initialInvoice, onSave, onCreated }: InvoiceFormPr
     },
     []
   );
+
+  const handleSaveTemplate = useCallback(() => {
+    if (!templateName.trim()) return;
+    const id = typeof crypto !== "undefined" && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `tpl-${Date.now()}`;
+    saveTemplate({
+      id,
+      name: templateName.trim(),
+      interval: templateInterval,
+      contactId: "",
+      contactName: invoice.customer.name,
+      currency: invoice.currency,
+      vatRate: invoice.vatRate,
+      lineItems: invoice.lineItems,
+      paymentDetails: invoice.paymentDetails,
+      createdAt: new Date().toISOString(),
+      lastUsedAt: "",
+    });
+    setShowTemplateForm(false);
+    setTemplateName("");
+    setShowTemplateSaved(true);
+    setTimeout(() => setShowTemplateSaved(false), 2000);
+  }, [templateName, templateInterval, invoice]);
 
   const dateFields: Array<{
     label: string;
@@ -466,8 +496,64 @@ export function InvoiceForm({ initialInvoice, onSave, onCreated }: InvoiceFormPr
         </div>
       )}
 
+      {/* Template Form (inline) */}
+      {showTemplateForm && (
+        <div className={`mb-6 ${t.cardBg} ${t.cardRadius} ${isMono ? "p-3" : "p-5"} ${t.cardShadow}`}>
+          <div className={`${isMono ? "text-[13px] uppercase tracking-widest mb-2" : "text-xs font-semibold uppercase tracking-wider mb-3"} ${t.labelColor}`}>
+            Save as Recurring Template
+          </div>
+          <div className={`grid grid-cols-3 gap-${isMono ? "2" : "3"}`}>
+            <div className="col-span-2">
+              <input
+                type="text"
+                placeholder="Template name"
+                value={templateName}
+                onChange={(e) => setTemplateName(e.target.value)}
+                className={`w-full ${isMono ? "text-[13px]" : "text-sm"} ${t.inputText} ${t.inputPlaceholder} ${t.inputBg} ${t.inputRadius} ${t.inputPadding} focus:outline-none ${t.inputFocusBg} ${isMono ? "border-b border-neutral-100 focus:border-neutral-900" : ""} transition-colors`}
+              />
+            </div>
+            <select
+              value={templateInterval}
+              onChange={(e) => setTemplateInterval(e.target.value as RecurringInterval)}
+              className={`${isMono ? "text-[13px]" : "text-sm"} ${t.inputText} ${t.inputBg} ${t.inputRadius} ${t.inputPadding} focus:outline-none cursor-pointer`}
+            >
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </div>
+          <div className="flex gap-2 justify-end mt-3">
+            <button type="button" onClick={() => setShowTemplateForm(false)} className={`${isMono ? "text-xs" : "text-xs font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} transition-colors`}>
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveTemplate}
+              disabled={!templateName.trim()}
+              className={`${isMono ? "text-xs uppercase tracking-widest border-b border-neutral-900 pb-0.5" : "px-3 py-1.5 text-xs font-medium"} ${t.primaryBtnBg} ${t.primaryBtnText} ${t.primaryBtnHoverBg} ${t.primaryBtnRadius} transition-all disabled:opacity-50`}
+            >
+              {isMono ? "save tpl" : "Save Template"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showTemplateSaved && (
+        <div className={`mb-4 text-center ${isMono ? "text-xs" : "text-sm font-medium"} text-emerald-600`}>
+          {isMono ? "template saved" : "Template saved!"}
+        </div>
+      )}
+
       {/* Actions */}
       <div className={`flex gap-4 justify-end ${isMono ? "border-t border-neutral-200 pt-6" : ""}`}>
+        <button
+          type="button"
+          onClick={() => setShowTemplateForm(!showTemplateForm)}
+          className={`${isMono ? "text-xs uppercase tracking-widest" : "px-6 py-3 text-sm font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} ${t.secondaryBtnBorder} transition-colors`}
+        >
+          {isMono ? "Tpl" : "Save Template"}
+        </button>
         <button
           type="button"
           onClick={() => onSave?.(invoice)}
