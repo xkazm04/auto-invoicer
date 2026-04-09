@@ -34,14 +34,15 @@ export function DraftsPanel({ onLoadDraft, onNewInvoice }: DraftsPanelProps) {
   const { theme: t } = useTheme();
   const isMono = t.id === "minimal-mono";
 
-  const [drafts, setDrafts] = useState<DraftSummary[]>([]);
+  const [drafts, setDrafts] = useState<DraftSummary[]>(() =>
+    typeof window !== "undefined" ? listDrafts() : []
+  );
 
   const refresh = useCallback(() => {
     setDrafts(listDrafts());
   }, []);
 
   useEffect(() => {
-    refresh();
     const handleStorage = (e: StorageEvent) => {
       if (e.key?.startsWith("invoice-drafts:")) refresh();
     };
