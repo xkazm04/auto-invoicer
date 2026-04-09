@@ -363,6 +363,44 @@ export function InvoicePDF({ invoice, themeId = "paper-perfect" }: InvoicePDFPro
             </View>
           </View>
         </View>
+        {/* Payment Details */}
+        {(invoice.paymentDetails.iban || invoice.paymentDetails.bankName) && (
+          <View style={{ marginTop: 28 }}>
+            <Text style={styles.itemsHeader}>Payment Details</Text>
+            <View style={styles.partyCard}>
+              {invoice.paymentDetails.iban && (
+                <View style={styles.partyDetailRow}>
+                  <Text style={[styles.partyDetailLabel, { width: 50 }]}>IBAN</Text>
+                  <Text style={[styles.partyDetailValue, { fontFamily: "Courier" }]}>
+                    {invoice.paymentDetails.iban}
+                  </Text>
+                </View>
+              )}
+              {invoice.paymentDetails.swift && (
+                <View style={styles.partyDetailRow}>
+                  <Text style={[styles.partyDetailLabel, { width: 50 }]}>SWIFT</Text>
+                  <Text style={[styles.partyDetailValue, { fontFamily: "Courier" }]}>
+                    {invoice.paymentDetails.swift}
+                  </Text>
+                </View>
+              )}
+              {invoice.paymentDetails.bankName && (
+                <View style={styles.partyDetailRow}>
+                  <Text style={[styles.partyDetailLabel, { width: 50 }]}>Bank</Text>
+                  <Text style={styles.partyDetailValue}>{invoice.paymentDetails.bankName}</Text>
+                </View>
+              )}
+              {invoice.paymentDetails.reference && (
+                <View style={styles.partyDetailRow}>
+                  <Text style={[styles.partyDetailLabel, { width: 50 }]}>Ref.</Text>
+                  <Text style={[styles.partyDetailValue, { fontFamily: "Courier" }]}>
+                    {invoice.paymentDetails.reference}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
       </Page>
     </Document>
   );
