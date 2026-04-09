@@ -112,3 +112,35 @@ The ranking criteria prioritize confidence (#1) over impact (#2). Follow-up item
 - Business Domain Scan produced the first goal aligned with what the user explicitly asked for in Run #7 feedback. This validates the v2 Improve Engine design — domain requirements outrank follow-up items.
 - 8 tasks is ambitious but executable — per-task tsc rhythm kept everything stable across the largest goal yet.
 - The first API route is a significant infrastructure milestone — future runs can add more server-side capabilities.
+
+---
+
+## Run #10 — 2026-04-09
+
+**Mode:** improve (user-directed mega-iteration — 5 goals combined)
+**Health scan:** 0 TS errors, 0 lint, 44/44 tests, 0 TODOs, largest file 509 LOC
+**Infrastructure check:** PASS
+**Selected goal:** Mega-iteration: Dashboard + Settings + Multi-currency + Recurring templates + UX polish
+**Source:** user-directed (user requested all 5 backlog items in one run)
+**Confidence at selection:** high (user explicitly approved)
+**Quality score:** 100/100
+**User verdict:** pending
+
+**What was implemented (9 tasks, 10 commits):**
+1. Foundation stores: archive, settings, recurring — types + localStorage CRUD (5 new files)
+2. Multi-currency formatMoney() utility with Intl.NumberFormat — applied to InvoiceForm, DraftsPanel, InvoicePDF
+3. Wire Create Invoice → archive + auto-fill supplier from saved company profile
+4. Dashboard page: KPI cards (invoiced/paid/outstanding/overdue), invoice list, status filter tabs, overdue tracking
+5. Settings page: company profile (with VAT lookup), payment defaults, currency/VAT config
+6. Recurring templates: Save as Template from invoice form + template management in settings
+7. AppHeader nav updated (4 items: Dashboard, Invoices, Contacts, Settings), homepage → /dashboard
+8. Confirmation dialogs (ConfirmDialog component, wired into draft + contact deletes), DraftsPanel BroadcastChannel
+9. 32 new tests (archive, settings, recurring stores + currency formatting) — 76 total, all passing
+
+**Scale:** 13 files created, 9 files modified, ~1458 lines added, 10 commits. Largest single run by far.
+
+**Lessons for future ranking:**
+- User-directed multi-goal iterations are viable if the goals are complementary. These 5 goals shared infrastructure (stores, formatting) that made bundling efficient.
+- 9 tasks in one run works with per-task tsc + commit rhythm. The key is that each task is independently testable and committable.
+- The mega-iteration pattern is best when the user explicitly wants velocity over granularity. Don't auto-select this pattern — it's a user choice.
+- createSampleInvoice() now depends on loadSettings() which reads localStorage — this means it can't be called server-side without the `typeof window` guard. Keep the guard.

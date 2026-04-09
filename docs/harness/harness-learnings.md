@@ -52,7 +52,22 @@ Living reference for vibeman / autonomous-development runs against this project.
 - ~~PDF theming parity~~ **DONE Run #7** — InvoicePDF now accepts `themeId` prop, uses `getPdfTheme()` from `src/lib/pdf/pdfTheme.ts`. Two PDF color configs: paper-perfect (warm #F8F7F4 background, #2C2825 text, rounded panels) and minimal-mono (white background, Courier font, no border radius). Theme flows through `downloadInvoicePDF(invoice, themeId)` from InvoiceForm.
 - ~~No test infrastructure~~ **DONE Run #3** — vitest configured with 34 tests across 3 files.
 - ~~"Create Invoice" shows alert()~~ **DONE Run #3** — replaced with themed success banner (auto-dismiss 4s).
-- No confirmation dialog before deleting drafts or overwriting.
-- DraftsPanel polls every 2s for same-tab sync — works but not optimal for battery/performance. Consider broadcasting via `BroadcastChannel` or a shared context.
+- ~~No confirmation dialog before deleting drafts or overwriting.~~ **DONE Run #10** — ConfirmDialog component in `src/components/ui/ConfirmDialog.tsx`, wired into DraftsPanel + contacts page.
+- ~~DraftsPanel polls every 2s for same-tab sync~~ **DONE Run #10** — BroadcastChannel `invoice-drafts-sync` for same-tab, StorageEvent for cross-tab, 10s fallback poll. Export `notifyDraftsChanged()` for callers.
 - Line items have no drag-to-reorder (only add/remove).
 - npm-audit findings in `@react-pdf/renderer` subgraph still present.
+
+## Open follow-ups (from Run #10, 2026-04-09)
+
+- **2026-04-09** — Invoice archive store (`src/lib/invoice/archive.ts`) uses `invoice-archive:` localStorage prefix. Pattern matches drafts and contacts stores. Archive stores the full Invoice + `_archivedAt` metadata.
+- **2026-04-09** — Settings store (`src/lib/settings/store.ts`) key: `app-settings`. Uses `createDefaultSettings()` for missing-field merge on load. Company profile auto-fills supplier on new invoices via `createSampleInvoice()`.
+- **2026-04-09** — Recurring templates store (`src/lib/recurring/store.ts`) uses `recurring-template:` prefix. Template captures line items, contact, payment details, interval. "Save as Template" inline form in InvoiceForm actions area.
+- **2026-04-09** — App now has 4 routes: `/dashboard`, `/invoices`, `/contacts`, `/settings`. Homepage `/` redirects to `/dashboard`. NAV_ITEMS in AppHeader controls nav links.
+- **2026-04-09** — `formatMoney()` in `src/lib/currency/format.ts` is the single source of truth for currency formatting. Uses `Intl.NumberFormat` with locale per currency (cs-CZ, de-DE, en-US). Options: `{ decimals?: boolean, symbolOnly?: boolean }`.
+- **2026-04-09** — Dashboard computes KPIs client-side from archive + drafts lists. Overdue detection uses `dueDate < now && status !== "paid"`. No server-side aggregation yet.
+- **2026-04-09** — `createSampleInvoice()` now auto-fills from settings: supplier, payment details, currency, VAT rate. Issue date = today, due date = today + 14 days. Line items start with 1 empty item instead of 2 sample items.
+- Recurring templates have no "Use Template" button yet — users can save templates but can't create invoices from them. Next run should add a template picker to the invoices page.
+- Settings page has no "Use Template" quick-create action.
+- Dashboard has no clickable invoice rows (no detail view / edit from dashboard).
+- No email/share/export functionality beyond PDF download.
+- No multi-language support (i18n).
