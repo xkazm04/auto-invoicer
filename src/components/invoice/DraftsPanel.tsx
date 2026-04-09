@@ -34,25 +34,25 @@ export function DraftsPanel({ onLoadDraft, onNewInvoice }: DraftsPanelProps) {
   const { theme: t } = useTheme();
   const isMono = t.id === "minimal-mono";
 
-  const [drafts, setDrafts] = useState<DraftSummary[]>([]);
+  const [drafts, setDrafts] = useState<DraftSummary[]>(() =>
+    typeof window !== "undefined" ? listDrafts() : []
+  );
 
   const refresh = useCallback(() => {
     setDrafts(listDrafts());
   }, []);
 
   useEffect(() => {
-    refresh();
     const handleStorage = (e: StorageEvent) => {
       if (e.key?.startsWith("invoice-drafts:")) refresh();
     };
     window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
-  }, [refresh]);
-
-  // Re-refresh when the panel renders (catches same-tab saves)
-  useEffect(() => {
+    // Poll for same-tab saves (localStorage doesn't fire storage events in same tab)
     const interval = setInterval(refresh, 2000);
-    return () => clearInterval(interval);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      clearInterval(interval);
+    };
   }, [refresh]);
 
   const handleDelete = useCallback((id: string) => {
