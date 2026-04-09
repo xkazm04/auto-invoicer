@@ -62,13 +62,17 @@ App shell with header navigation + route structure (/invoices, /contacts, /setti
 **Source:** follow-up (noted since Run #1, 5 runs ago)
 **Confidence at selection:** high
 **Quality score:** 100/100
-**User verdict:** pending
+**User verdict:** ACCEPTED (feature works) but CRITIQUED (wrong priority)
+**Reasoning:** "Feature is nice but we're missing core business features. How to correctly design and populate invoices from a legal perspective, what does it mean across multiple countries, how to really create an international invoice app, whether we can use official registries to get metadata per VAT ID. The skill should evaluate competition or how invoices are created so it understands what lacks and designs larger features. Goals are too small, leading to non-risky but no high value outcomes."
 
-**Backlog presented:**
-1. PDF theming parity (selected) — follow-up, high confidence
-2. Invoice list page with status filtering — product gap
-3. Confirmation dialogs — follow-up, low impact
-4. i18n foundation — vision-gap, high blast radius
+**What should have ranked higher:**
+Country-specific invoice compliance — legal field requirements per jurisdiction (CZ: IČO/DIČ via ARES, EU: VAT validation via VIES), mandatory invoice fields, sequential numbering rules, tax calculation rules. This is the *core business value* of an international invoice app.
+
+**Root cause of the ranking miss:**
+The ranking criteria prioritize confidence (#1) over impact (#2). Follow-up items are always highest-confidence, so they always win. But confidence doesn't equal value — "we're sure this small polish is correct" beats "this large business feature would make the product viable." The skill optimizes for safety, not growth.
 
 **Lessons for future ranking:**
-- First autonomous goal after the infra override. Infrastructure check passed, so the Improve Engine ran normally. Selected the highest-confidence follow-up item that has been on the list the longest (5 runs). The reasoning: follow-up items > vision gaps > research, and this item has the clearest scope + highest user-visible impact (PDF is what clients see).
+- **CRITICAL: Flip the ranking. Impact (business value) must be #1, confidence #2.** A high-impact medium-confidence goal beats a low-impact high-confidence goal every time. The user has said this twice now (Run #2: "we need more ambitious iterations", Run #7: "goals are too small").
+- **Follow-up items are polish, not product.** Open follow-ups (PDF theming, confirmation dialogs, polling optimization) are UX polish. They don't make the product *viable* for real users. The Improve Engine must distinguish between "polish the existing features" and "add the features that make this a real product."
+- **The Improve Engine needs a Business Domain Scan.** Before checking follow-ups or vision gaps, research what the *business domain requires*. For an invoice app: legal compliance, mandatory fields, tax rules, registry validation. This is the highest-value source because it identifies what makes the product *actually usable* vs. just *technically complete*.
+- **Goals should be larger.** The user wants 5-8 task ambitious goals that address a business capability, not 3-4 task polish goals that close a follow-up. "Country-specific invoice compliance" is a business capability; "PDF theming parity" is polish.
