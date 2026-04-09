@@ -12,8 +12,8 @@ Training data for autonomous goal selection. Read at Phase 2a start to inform fu
 **Source:** web-research + vision-gap (Contacts/CRM section in solution.md)
 **Confidence at selection:** medium
 **Quality score:** 100/100
-**User verdict:** pending — awaiting user evaluation
-**Reasoning (if rejected/modified):** TBD
+**User verdict:** REJECTED (feature is correct but premature)
+**Reasoning:** The contact book feature is technically solid but *isolated* — it's buried inside InvoiceForm's party section headers with no standalone access. The app has no navigation, no header, no route structure. Without a base layout and multi-page architecture, new features are undiscoverable. The user correctly identified that **app shell + navigation infrastructure** should have been prioritized over any individual feature.
 
 **Backlog presented:**
 1. Client contact book (selected) — research + vision
@@ -22,5 +22,14 @@ Training data for autonomous goal selection. Read at Phase 2a start to inform fu
 4. Recurring invoice templates — research
 5. Confirmation dialogs bundle — follow-up
 
+**What should have been #1 instead:**
+App shell with header navigation + route structure (/invoices, /contacts, /settings). This is an *infrastructure* goal that enables every future feature to be discoverable. The backlog ranking missed it because:
+- It's not in the open follow-ups (nobody flagged it yet)
+- The vision doc assumes it exists but doesn't list it as a discrete feature
+- The health scan checks code quality, not UX architecture
+- Web research returns features, not infrastructure
+
 **Lessons for future ranking:**
-- First autonomous run — no prior judgment data to learn from. Selected based on: highest impact (core feature every competitor has) × builds on existing patterns (Party type, localStorage). Medium confidence because it's a new feature area, not an extension of recent work.
+- **NEW RULE: Before ranking features, check if the app has navigational infrastructure to host them.** If the app is a single-page monolith with no routing/nav, the highest-priority goal is ALWAYS "add app shell + route structure" — regardless of what features the backlog contains. Features without navigation are features users can't find.
+- **The Improve Engine's three sources (follow-ups, vision-gap, research) all return *features*, never *infrastructure*.** Infrastructure gaps are invisible to feature-oriented scanning. The health scan checks code quality but not UX architecture. A new check is needed: "does the app have navigational structure to host N modules?" If not, that's the goal.
+- Medium-confidence web-research goals need an additional filter: "can the user actually access this feature given the current app structure?"
