@@ -1,7 +1,12 @@
 import type { Invoice } from "@/types/invoice";
 import { getNextInvoiceNumber } from "./numbering";
+import { loadSettings } from "@/lib/settings/store";
 
 export function createSampleInvoice(): Invoice {
+  const settings = typeof window !== "undefined" ? loadSettings() : null;
+  const today = new Date().toISOString().slice(0, 10);
+  const due = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
+
   return {
     id: typeof crypto !== "undefined" && crypto.randomUUID
       ? crypto.randomUUID()
@@ -9,11 +14,11 @@ export function createSampleInvoice(): Invoice {
     number:
       typeof window !== "undefined" ? getNextInvoiceNumber() : "0000-0001",
     status: "draft",
-    issueDate: "2024-12-02",
-    dueDate: "2024-12-16",
-    taxPoint: "2024-12-02",
-    currency: "CZK",
-    supplier: {
+    issueDate: today,
+    dueDate: due,
+    taxPoint: today,
+    currency: settings?.defaultCurrency ?? "CZK",
+    supplier: settings?.companyProfile ?? {
       name: "",
       taxId: "",
       vatId: "",
@@ -30,19 +35,13 @@ export function createSampleInvoice(): Invoice {
     lineItems: [
       {
         id: "sample-1",
-        description: "Consulting Services",
-        quantity: 10,
-        unitPrice: 1500,
-      },
-      {
-        id: "sample-2",
-        description: "Development Hours",
-        quantity: 40,
-        unitPrice: 2000,
+        description: "",
+        quantity: 1,
+        unitPrice: 0,
       },
     ],
-    vatRate: 0.21,
-    paymentDetails: {
+    vatRate: settings?.defaultVatRate ?? 0.21,
+    paymentDetails: settings?.defaultPaymentDetails ?? {
       iban: "",
       swift: "",
       bankName: "",

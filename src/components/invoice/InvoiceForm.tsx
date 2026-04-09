@@ -8,6 +8,8 @@ import { createSampleInvoice, createEmptyLineItem } from "@/lib/invoice/sample";
 import { downloadInvoicePDF } from "@/lib/pdf/download";
 import { validateInvoice, type ValidationErrors } from "@/lib/invoice/validation";
 import { formatMoney } from "@/lib/currency/format";
+import { archiveInvoice } from "@/lib/invoice/archive";
+import { deleteDraft } from "@/lib/invoice/drafts";
 import { PartySection } from "./PartySection";
 
 function statusLabel(status: Invoice["status"]): string {
@@ -23,9 +25,10 @@ function FieldError({ path, errors }: { path: string; errors: ValidationErrors }
 export interface InvoiceFormProps {
   initialInvoice?: Invoice;
   onSave?: (invoice: Invoice) => void;
+  onCreated?: (invoice: Invoice) => void;
 }
 
-export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
+export function InvoiceForm({ initialInvoice, onSave, onCreated }: InvoiceFormProps) {
   const { theme } = useTheme();
   const t = theme;
   const isMono = t.id === "minimal-mono";
@@ -486,8 +489,12 @@ export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
             setHasAttemptedCreate(true);
             const valid = revalidate(invoice);
             if (valid) {
+              const finalized = { ...invoice, status: "sent" as const };
+              archiveInvoice(finalized);
+              deleteDraft(invoice.id);
               setShowSuccess(true);
               setTimeout(() => setShowSuccess(false), 4000);
+              onCreated?.(finalized);
             }
           }}
           disabled={hasAttemptedCreate && Object.keys(validationErrors).length > 0}
