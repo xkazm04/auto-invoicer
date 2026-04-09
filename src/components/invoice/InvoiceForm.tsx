@@ -28,12 +28,17 @@ function FieldError({ path, errors }: { path: string; errors: ValidationErrors }
   return <span className="text-[10px] text-red-500 mt-0.5 block">{msg}</span>;
 }
 
-export function InvoiceForm() {
+export interface InvoiceFormProps {
+  initialInvoice?: Invoice;
+  onSave?: (invoice: Invoice) => void;
+}
+
+export function InvoiceForm({ initialInvoice, onSave }: InvoiceFormProps) {
   const { theme } = useTheme();
   const t = theme;
   const isMono = t.id === "minimal-mono";
 
-  const [invoice, setInvoice] = useState<Invoice>(createSampleInvoice);
+  const [invoice, setInvoice] = useState<Invoice>(() => initialInvoice ?? createSampleInvoice());
   const [isGenerating, setIsGenerating] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [hasAttemptedCreate, setHasAttemptedCreate] = useState(false);
@@ -471,6 +476,7 @@ export function InvoiceForm() {
       <div className={`flex gap-4 justify-end ${isMono ? "border-t border-neutral-200 pt-6" : ""}`}>
         <button
           type="button"
+          onClick={() => onSave?.(invoice)}
           className={`${isMono ? "text-[10px] uppercase tracking-widest" : "px-6 py-3 text-sm font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} ${t.secondaryBtnBorder} transition-colors`}
         >
           {isMono ? "Draft" : "Save Draft"}

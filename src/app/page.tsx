@@ -1,22 +1,59 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import type { ThemeId } from "@/components/invoice/theme";
 import { themes } from "@/components/invoice/theme";
 import { ThemeContext } from "@/components/invoice/ThemeContext";
 import { ThemeSwitcher } from "@/components/invoice/ThemeSwitcher";
 import { InvoiceForm } from "@/components/invoice/InvoiceForm";
+import type { Invoice } from "@/types/invoice";
+import { saveDraft, loadDraft } from "@/lib/invoice/drafts";
+import { createSampleInvoice } from "@/lib/invoice/sample";
 
 export default function Home() {
   const [themeId, setThemeId] = useState<ThemeId>("paper-perfect");
   const theme = themes[themeId];
 
+  const [currentInvoice, setCurrentInvoice] = useState<Invoice>(createSampleInvoice);
+  const [formKey, setFormKey] = useState(0);
+  const [saveFlash, setSaveFlash] = useState(false);
+
+  const handleSave = useCallback((invoice: Invoice) => {
+    saveDraft(invoice);
+    setCurrentInvoice(invoice);
+    setSaveFlash(true);
+    setTimeout(() => setSaveFlash(false), 1500);
+  }, []);
+
+  const handleLoadDraft = useCallback((id: string) => {
+    const draft = loadDraft(id);
+    if (draft) {
+      setCurrentInvoice(draft);
+      setFormKey((k) => k + 1);
+    }
+  }, []);
+
+  const handleNewInvoice = useCallback(() => {
+    const fresh = createSampleInvoice();
+    setCurrentInvoice(fresh);
+    setFormKey((k) => k + 1);
+  }, []);
+
   return (
     <ThemeContext.Provider value={{ theme, setTheme: setThemeId }}>
       <div className={`min-h-screen transition-all duration-500 ${theme.pageBg}`}>
         <ThemeSwitcher />
+        {saveFlash && (
+          <div className="fixed top-4 right-4 z-50 bg-green-600 text-white text-sm px-4 py-2 rounded-lg shadow-lg animate-pulse">
+            Draft saved
+          </div>
+        )}
         <main className={`pt-20 pb-12 px-4 ${theme.fontFamily}`}>
-          <InvoiceForm />
+          <InvoiceForm
+            key={formKey}
+            initialInvoice={currentInvoice}
+            onSave={handleSave}
+          />
         </main>
       </div>
     </ThemeContext.Provider>
