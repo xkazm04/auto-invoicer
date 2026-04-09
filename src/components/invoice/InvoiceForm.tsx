@@ -13,6 +13,7 @@ import { deleteDraft } from "@/lib/invoice/drafts";
 import { saveTemplate } from "@/lib/recurring/store";
 import type { RecurringInterval } from "@/types/recurring";
 import { PartySection } from "./PartySection";
+import { QrPayment } from "./QrPayment";
 
 function statusLabel(status: Invoice["status"]): string {
   return status.charAt(0).toUpperCase() + status.slice(1);
@@ -468,6 +469,11 @@ export function InvoiceForm({ initialInvoice, onSave, onCreated }: InvoiceFormPr
             </div>
           </div>
         </div>
+      </div>
+
+      {/* QR Payment Code */}
+      <div className="mb-10">
+        <QrPayment invoice={invoice} />
       </div>
 
       {/* Success Confirmation */}
