@@ -38,7 +38,7 @@ export function ClientShell({ children: _children }: ClientShellProps) {
       case "contacts":
         return <ContactsModule />;
       case "settings":
-        return <SettingsModule />;
+        return <SettingsModule onNavigate={handleTabChange} />;
     }
   };
 

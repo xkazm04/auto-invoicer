@@ -12,7 +12,11 @@ import { formatMoney } from "@/lib/currency/format";
 import { PartySection } from "@/components/invoice/PartySection";
 import { FadeIn } from "@/components/ui/FadeIn";
 
-export default function SettingsModule() {
+interface SettingsModuleProps {
+  onNavigate?: (tab: "dashboard" | "invoices" | "contacts" | "settings") => void;
+}
+
+export default function SettingsModule({ onNavigate }: SettingsModuleProps = {}) {
   const { theme: t } = useTheme();
   const isMono = t.id === "minimal-mono";
 
@@ -187,9 +191,14 @@ export default function SettingsModule() {
                       {formatMoney(tpl.lineItems.reduce((sum, li) => sum + li.quantity * li.unitPrice, 0) * (1 + tpl.vatRate), tpl.currency, { decimals: false })}
                     </div>
                   </div>
-                  <button type="button" onClick={() => handleDeleteTemplate(tpl.id)} className={`opacity-0 group-hover:opacity-100 ${isMono ? "text-[13px]" : "text-xs"} text-neutral-400 hover:text-red-500 transition-all`}>
-                    {isMono ? "del" : "Delete"}
-                  </button>
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                    <button type="button" onClick={() => onNavigate?.("invoices")} className={`${isMono ? "text-[13px]" : "text-xs font-medium"} ${t.primaryBtnText} ${t.primaryBtnBg} ${isMono ? "" : "px-2 py-0.5 rounded"} ${t.primaryBtnHoverBg} transition-colors`}>
+                      {isMono ? "use" : "Use"}
+                    </button>
+                    <button type="button" onClick={() => handleDeleteTemplate(tpl.id)} className={`${isMono ? "text-[13px]" : "text-xs"} text-neutral-400 hover:text-red-500 transition-colors`}>
+                      {isMono ? "del" : "Delete"}
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
