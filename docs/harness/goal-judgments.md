@@ -76,3 +76,33 @@ The ranking criteria prioritize confidence (#1) over impact (#2). Follow-up item
 - **Follow-up items are polish, not product.** Open follow-ups (PDF theming, confirmation dialogs, polling optimization) are UX polish. They don't make the product *viable* for real users. The Improve Engine must distinguish between "polish the existing features" and "add the features that make this a real product."
 - **The Improve Engine needs a Business Domain Scan.** Before checking follow-ups or vision gaps, research what the *business domain requires*. For an invoice app: legal compliance, mandatory fields, tax rules, registry validation. This is the highest-value source because it identifies what makes the product *actually usable* vs. just *technically complete*.
 - **Goals should be larger.** The user wants 5-8 task ambitious goals that address a business capability, not 3-4 task polish goals that close a follow-up. "Country-specific invoice compliance" is a business capability; "PDF theming parity" is polish.
+
+---
+
+## Run #8 — 2026-04-09
+
+**Mode:** improve (Business Domain Scan — first use of v2 Improve Engine)
+**Health scan:** 0 TS errors, 0 lint, 44/44 tests, 0 TODOs, largest file 572 LOC
+**Infrastructure check:** PASS
+**Selected goal:** Invoice compliance: payment details, auto-numbering, VAT ID lookup
+**Source:** business domain scan (EU Directive 2006/112/EC Article 226, ARES API, VIES API)
+**Confidence at selection:** medium
+**Quality score:** 100/100
+**User verdict:** pending
+
+**Business Domain Scan findings:**
+- EU invoices require: sequential numbering, payment details (IBAN), VAT breakdown, seller/buyer IDs
+- Czech ARES REST API: free, no key, lookup by IČO at ares.gov.cz
+- EU VIES REST API: free, no key, validate any EU VAT number
+- The app had ZERO of these — no payment fields, no auto-numbering, no API routes
+
+**What was implemented (8 tasks):**
+1. PaymentDetails on Invoice type (IBAN, SWIFT, bank, reference) — form + PDF
+2. Auto-sequential numbering (YYYY-NNNN, localStorage-persisted, year-reset)
+3. First API route: /api/vat/validate (ARES for CZ IČO, VIES for EU VAT)
+4. VAT lookup buttons on supplier/customer sections — auto-fill from registry
+
+**Lessons for future ranking:**
+- Business Domain Scan produced the first goal aligned with what the user explicitly asked for in Run #7 feedback. This validates the v2 Improve Engine design — domain requirements outrank follow-up items.
+- 8 tasks is ambitious but executable — per-task tsc rhythm kept everything stable across the largest goal yet.
+- The first API route is a significant infrastructure milestone — future runs can add more server-side capabilities.
