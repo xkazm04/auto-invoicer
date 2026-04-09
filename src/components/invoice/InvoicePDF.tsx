@@ -3,6 +3,7 @@ import {
   Page,
   Text,
   View,
+  Image,
   StyleSheet,
 } from "@react-pdf/renderer";
 import type { Invoice } from "@/types/invoice";
@@ -230,10 +231,12 @@ function fmtTotal(value: number, currency: Invoice["currency"]): string {
 export interface InvoicePDFProps {
   invoice: Invoice;
   themeId?: ThemeId;
+  qrDataUrl?: string | null;
 }
 
-export function InvoicePDF({ invoice, themeId = "paper-perfect" }: InvoicePDFProps) {
+export function InvoicePDF({ invoice, themeId = "paper-perfect", qrDataUrl }: InvoicePDFProps) {
   const pdfTheme = getPdfTheme(themeId);
+  const c = pdfTheme.colors;
   const styles = buildStyles(pdfTheme);
   const totals = computeInvoiceTotals(invoice);
   const items = invoice.lineItems;
@@ -405,6 +408,23 @@ export function InvoicePDF({ invoice, themeId = "paper-perfect" }: InvoicePDFPro
                   </Text>
                 </View>
               )}
+            </View>
+          </View>
+        )}
+        {/* QR Payment Code */}
+        {qrDataUrl && (
+          <View style={{ marginTop: 28, alignItems: "center" }}>
+            <Text style={styles.itemsHeader}>QR Payment</Text>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Image src={qrDataUrl} style={{ width: 100, height: 100 }} />
+              <View style={{ marginLeft: 12 }}>
+                <Text style={{ fontSize: 8, color: c.textMuted }}>
+                  Scan with your banking app
+                </Text>
+                <Text style={{ fontSize: 7, color: c.textFaint, marginTop: 2 }}>
+                  Czech SPD/SPAYD format
+                </Text>
+              </View>
             </View>
           </View>
         )}
