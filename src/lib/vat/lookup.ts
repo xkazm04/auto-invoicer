@@ -8,7 +8,7 @@ export async function lookupVat(vatId: string, countryCode: string): Promise<Vat
   });
 
   if (!res.ok) {
-    return { valid: false, name: "", address: "", countryCode, error: `HTTP ${res.status}` };
+    return { valid: false, name: "", address: "", countryCode, registrationId: "", taxId: "", legalForm: "", error: `HTTP ${res.status}` };
   }
 
   return res.json();

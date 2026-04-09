@@ -18,12 +18,14 @@ export function createSampleInvoice(): Invoice {
       taxId: "",
       vatId: "",
       address: "",
+      registrationId: "",
     },
     customer: {
       name: "",
       taxId: "",
       vatId: "",
       address: "",
+      registrationId: "",
     },
     lineItems: [
       {

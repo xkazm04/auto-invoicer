@@ -11,8 +11,8 @@ function validInvoice(): Invoice {
     dueDate: "2024-01-15",
     taxPoint: "2024-01-01",
     currency: "CZK",
-    supplier: { name: "Acme Ltd", taxId: "12345", vatId: "CZ12345", address: "Main St" },
-    customer: { name: "Client Co", taxId: "67890", vatId: "CZ67890", address: "Side Rd" },
+    supplier: { name: "Acme Ltd", taxId: "12345", vatId: "CZ12345", address: "Main St", registrationId: "" },
+    customer: { name: "Client Co", taxId: "67890", vatId: "CZ67890", address: "Side Rd", registrationId: "" },
     lineItems: [
       { id: "li-1", description: "Service", quantity: 5, unitPrice: 200 },
     ],

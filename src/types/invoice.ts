@@ -7,6 +7,7 @@ export interface Party {
   taxId: string;
   vatId: string;
   address: string;
+  registrationId: string;
 }
 
 export interface LineItem {

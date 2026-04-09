@@ -33,6 +33,7 @@ function makeParty(name = "Acme Ltd"): Party {
     taxId: "12345678",
     vatId: "CZ12345678",
     address: "Main St 1, Prague",
+    registrationId: "",
   };
 }
 

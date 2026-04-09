@@ -8,5 +8,8 @@ export interface VatLookupResult {
   name: string;
   address: string;
   countryCode: string;
+  registrationId: string;
+  taxId: string;
+  legalForm: string;
   error?: string;
 }

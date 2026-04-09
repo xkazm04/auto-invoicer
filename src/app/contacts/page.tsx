@@ -11,7 +11,7 @@ import {
   listContacts,
 } from "@/lib/contacts/store";
 
-const EMPTY_PARTY: Party = { name: "", taxId: "", vatId: "", address: "" };
+const EMPTY_PARTY: Party = { name: "", taxId: "", vatId: "", address: "", registrationId: "" };
 
 export default function ContactsPage() {
   const { theme: t } = useTheme();
