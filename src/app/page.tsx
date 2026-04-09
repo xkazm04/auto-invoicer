@@ -6,6 +6,7 @@ import { themes } from "@/components/invoice/theme";
 import { ThemeContext } from "@/components/invoice/ThemeContext";
 import { ThemeSwitcher } from "@/components/invoice/ThemeSwitcher";
 import { InvoiceForm } from "@/components/invoice/InvoiceForm";
+import { DraftsPanel } from "@/components/invoice/DraftsPanel";
 import type { Invoice } from "@/types/invoice";
 import { saveDraft, loadDraft } from "@/lib/invoice/drafts";
 import { createSampleInvoice } from "@/lib/invoice/sample";
@@ -49,11 +50,21 @@ export default function Home() {
           </div>
         )}
         <main className={`pt-20 pb-12 px-4 ${theme.fontFamily}`}>
-          <InvoiceForm
-            key={formKey}
-            initialInvoice={currentInvoice}
-            onSave={handleSave}
-          />
+          <div className="max-w-4xl mx-auto flex gap-8">
+            <aside className="w-56 shrink-0">
+              <DraftsPanel
+                onLoadDraft={handleLoadDraft}
+                onNewInvoice={handleNewInvoice}
+              />
+            </aside>
+            <div className="flex-1 min-w-0">
+              <InvoiceForm
+                key={formKey}
+                initialInvoice={currentInvoice}
+                onSave={handleSave}
+              />
+            </div>
+          </div>
         </main>
       </div>
     </ThemeContext.Provider>
