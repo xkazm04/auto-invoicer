@@ -10,6 +10,7 @@ import {
   deleteContact,
   listContacts,
 } from "@/lib/contacts/store";
+import { PartySection } from "@/components/invoice/PartySection";
 
 const EMPTY_PARTY: Party = { name: "", taxId: "", vatId: "", address: "", registrationId: "" };
 
@@ -33,7 +34,7 @@ export default function ContactsPage() {
   }, []);
 
   const startEdit = useCallback((contact: Contact) => {
-    setDraft({ name: contact.name, taxId: contact.taxId, vatId: contact.vatId, address: contact.address });
+    setDraft({ name: contact.name, taxId: contact.taxId, vatId: contact.vatId, address: contact.address, registrationId: contact.registrationId || "" });
     setEditingId(contact.id);
     setIsAdding(false);
   }, []);
@@ -87,58 +88,38 @@ export default function ContactsPage() {
 
       {/* Add / Edit form */}
       {(isAdding || editingId) && (
-        <div className={`mb-6 ${isMono ? "border border-neutral-200 p-3" : "rounded-2xl p-5 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]"}`}>
+        <div className="mb-6">
           <div className={`${isMono ? "text-[13px]" : "text-xs font-semibold"} ${t.labelColor} uppercase tracking-wider mb-3`}>
             {editingId ? "Edit Contact" : "New Contact"}
           </div>
-          <div className="space-y-3">
-            <input
-              type="text"
-              placeholder="Name"
-              value={draft.name}
-              onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
-              className={inputClass}
-            />
-            <div className="grid grid-cols-2 gap-3">
-              <input
-                type="text"
-                placeholder="Tax ID"
-                value={draft.taxId}
-                onChange={(e) => setDraft((d) => ({ ...d, taxId: e.target.value }))}
-                className={inputClass}
-              />
-              <input
-                type="text"
-                placeholder="VAT ID"
-                value={draft.vatId}
-                onChange={(e) => setDraft((d) => ({ ...d, vatId: e.target.value }))}
-                className={inputClass}
-              />
-            </div>
-            <textarea
-              placeholder="Address"
-              rows={2}
-              value={draft.address}
-              onChange={(e) => setDraft((d) => ({ ...d, address: e.target.value }))}
-              className={`${inputClass} resize-none`}
-            />
-            <div className="flex gap-3 justify-end">
-              <button
-                type="button"
-                onClick={handleCancel}
-                className={`${isMono ? "text-xs uppercase tracking-widest" : "px-4 py-2 text-xs font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} transition-colors`}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={!draft.name.trim()}
-                className={`${isMono ? "text-xs uppercase tracking-widest border-b border-neutral-900 pb-0.5" : "px-4 py-2 text-xs"} ${t.primaryBtnBg} ${t.primaryBtnHoverBg} ${t.primaryBtnText} ${t.primaryBtnRadius} transition-all disabled:opacity-50`}
-              >
-                {editingId ? "Update" : "Save"}
-              </button>
-            </div>
+          <PartySection
+            party={draft}
+            partyKey="contact"
+            label={editingId ? "Edit" : "New"}
+            handwrittenLabel={editingId ? "Edit" : "New"}
+            bgClass={t.partyFromBg}
+            iconBgClass={t.partyIconBg}
+            iconColorClass={t.partyIconColor}
+            iconPath="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            onChange={setDraft}
+            countryHint="CZ"
+          />
+          <div className="flex gap-3 justify-end mt-3">
+            <button
+              type="button"
+              onClick={handleCancel}
+              className={`${isMono ? "text-xs uppercase tracking-widest" : "px-4 py-2 text-xs font-medium"} ${t.secondaryBtnText} ${t.secondaryBtnHoverText} transition-colors`}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={!draft.name.trim()}
+              className={`${isMono ? "text-xs uppercase tracking-widest border-b border-neutral-900 pb-0.5" : "px-4 py-2 text-xs"} ${t.primaryBtnBg} ${t.primaryBtnHoverBg} ${t.primaryBtnText} ${t.primaryBtnRadius} transition-all disabled:opacity-50`}
+            >
+              {editingId ? "Update" : "Save"}
+            </button>
           </div>
         </div>
       )}
