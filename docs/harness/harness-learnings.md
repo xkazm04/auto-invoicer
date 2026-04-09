@@ -46,7 +46,7 @@ Living reference for vibeman / autonomous-development runs against this project.
 - ~~"Save Draft" / "Create Invoice" buttons~~ **DONE Run #2** (Save saves to localStorage, Create validates via zod)
 - ~~No persistence~~ **DONE Run #2** (localStorage drafts with DraftsPanel sidebar)
 - ~~No form validation~~ **DONE Run #2** (zod schema, inline errors, submit gate)
-- PDF theming parity (still neutral default in PDF, regardless of Tailwind theme).
+- ~~PDF theming parity~~ **DONE Run #7** — InvoicePDF now accepts `themeId` prop, uses `getPdfTheme()` from `src/lib/pdf/pdfTheme.ts`. Two PDF color configs: paper-perfect (warm #F8F7F4 background, #2C2825 text, rounded panels) and minimal-mono (white background, Courier font, no border radius). Theme flows through `downloadInvoicePDF(invoice, themeId)` from InvoiceForm.
 - ~~No test infrastructure~~ **DONE Run #3** — vitest configured with 34 tests across 3 files.
 - ~~"Create Invoice" shows alert()~~ **DONE Run #3** — replaced with themed success banner (auto-dismiss 4s).
 - No confirmation dialog before deleting drafts or overwriting.

@@ -50,3 +50,25 @@ App shell with header navigation + route structure (/invoices, /contacts, /setti
 **Lessons for future ranking:**
 - Infrastructure-readiness check fired exactly as designed and selected the correct goal. The Run #4 lesson is now validated: the check catches the missing navigation gap and overrides feature candidates.
 - Adding a new route is now trivial: create `src/app/{name}/page.tsx` + add one line to `NAV_ITEMS` in AppHeader. The module hosting pattern is established.
+
+---
+
+## Run #7 — 2026-04-09
+
+**Mode:** improve
+**Health scan:** 0 TS errors, 0 lint, 44/44 tests, 0 TODOs, largest file 572 LOC
+**Infrastructure check:** PASS (2 routes, AppHeader nav, ClientShell layout)
+**Selected goal:** PDF theming parity — match selected Tailwind theme in PDF output
+**Source:** follow-up (noted since Run #1, 5 runs ago)
+**Confidence at selection:** high
+**Quality score:** 100/100
+**User verdict:** pending
+
+**Backlog presented:**
+1. PDF theming parity (selected) — follow-up, high confidence
+2. Invoice list page with status filtering — product gap
+3. Confirmation dialogs — follow-up, low impact
+4. i18n foundation — vision-gap, high blast radius
+
+**Lessons for future ranking:**
+- First autonomous goal after the infra override. Infrastructure check passed, so the Improve Engine ran normally. Selected the highest-confidence follow-up item that has been on the list the longest (5 runs). The reasoning: follow-up items > vision gaps > research, and this item has the clearest scope + highest user-visible impact (PDF is what clients see).
