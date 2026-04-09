@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, memo } from "react";
 import { useTheme } from "./ThemeContext";
 import type { Party } from "@/types/invoice";
 import type { Contact } from "@/types/contact";
@@ -10,7 +10,7 @@ interface ContactPickerProps {
   onSelect: (party: Party) => void;
 }
 
-export function ContactPicker({ onSelect }: ContactPickerProps) {
+export const ContactPicker = memo(function ContactPicker({ onSelect }: ContactPickerProps) {
   const { theme: t } = useTheme();
   const isMono = t.id === "minimal-mono";
   const [open, setOpen] = useState(false);
@@ -90,4 +90,4 @@ export function ContactPicker({ onSelect }: ContactPickerProps) {
       )}
     </div>
   );
-}
+});

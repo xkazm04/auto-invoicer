@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, memo } from "react";
 import { useTheme } from "@/components/invoice/ThemeContext";
 
 interface ConfirmDialogProps {
@@ -14,7 +14,7 @@ interface ConfirmDialogProps {
   onCancel: () => void;
 }
 
-export function ConfirmDialog({
+export const ConfirmDialog = memo(function ConfirmDialog({
   open,
   title,
   message,
@@ -85,4 +85,4 @@ export function ConfirmDialog({
       </div>
     </dialog>
   );
-}
+});

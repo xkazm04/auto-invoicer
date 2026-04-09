@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, memo } from "react";
 import { useTheme } from "./ThemeContext";
 import { ContactPicker } from "./ContactPicker";
 import { saveContact } from "@/lib/contacts/store";
@@ -29,7 +29,7 @@ interface PartySectionProps {
   countryHint?: string;
 }
 
-export function PartySection({
+export const PartySection = memo(function PartySection({
   party,
   partyKey,
   label,
@@ -163,4 +163,4 @@ export function PartySection({
       </div>
     </div>
   );
-}
+});

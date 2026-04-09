@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useTheme } from "./ThemeContext";
 import type { Currency, Invoice, LineItem, Party, PaymentDetails } from "@/types/invoice";
 import { computeInvoiceTotals, nextStatus } from "@/types/invoice";
@@ -44,7 +44,7 @@ export function InvoiceForm({ initialInvoice, onSave, onCreated }: InvoiceFormPr
   const [showTemplateForm, setShowTemplateForm] = useState(false);
   const [templateName, setTemplateName] = useState("");
   const [templateInterval, setTemplateInterval] = useState<RecurringInterval>("monthly");
-  const totals = computeInvoiceTotals(invoice);
+  const totals = useMemo(() => computeInvoiceTotals(invoice), [invoice]);
 
   const revalidate = useCallback((inv: Invoice) => {
     const result = validateInvoice(inv);
