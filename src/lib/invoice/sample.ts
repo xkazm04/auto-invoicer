@@ -1,11 +1,13 @@
 import type { Invoice } from "@/types/invoice";
+import { getNextInvoiceNumber } from "./numbering";
 
 export function createSampleInvoice(): Invoice {
   return {
     id: typeof crypto !== "undefined" && crypto.randomUUID
       ? crypto.randomUUID()
       : `inv-${Date.now()}`,
-    number: "2024-0042",
+    number:
+      typeof window !== "undefined" ? getNextInvoiceNumber() : "0000-0001",
     status: "draft",
     issueDate: "2024-12-02",
     dueDate: "2024-12-16",
