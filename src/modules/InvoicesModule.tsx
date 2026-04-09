@@ -3,9 +3,12 @@
 import { useState, useCallback, memo } from "react";
 import { InvoiceForm } from "@/components/invoice/InvoiceForm";
 import { DraftsPanel } from "@/components/invoice/DraftsPanel";
+import { TemplatePicker } from "@/components/invoice/TemplatePicker";
 import type { Invoice } from "@/types/invoice";
+import type { RecurringTemplate } from "@/types/recurring";
 import { saveDraft, loadDraft } from "@/lib/invoice/drafts";
 import { createSampleInvoice } from "@/lib/invoice/sample";
+import { createInvoiceFromTemplate } from "@/lib/invoice/fromTemplate";
 
 const MemoizedInvoiceForm = memo(InvoiceForm);
 
@@ -35,6 +38,12 @@ export default function InvoicesModule() {
     setFormKey((k) => k + 1);
   }, []);
 
+  const handleUseTemplate = useCallback((template: RecurringTemplate) => {
+    const invoice = createInvoiceFromTemplate(template);
+    setCurrentInvoice(invoice);
+    setFormKey((k) => k + 1);
+  }, []);
+
   return (
     <>
       {saveFlash && (
@@ -43,11 +52,12 @@ export default function InvoicesModule() {
         </div>
       )}
       <div className="max-w-4xl mx-auto flex gap-8">
-        <aside className="w-56 shrink-0">
+        <aside className="w-56 shrink-0 space-y-4">
           <DraftsPanel
             onLoadDraft={handleLoadDraft}
             onNewInvoice={handleNewInvoice}
           />
+          <TemplatePicker onSelect={handleUseTemplate} />
         </aside>
         <div className="flex-1 min-w-0">
           <MemoizedInvoiceForm
